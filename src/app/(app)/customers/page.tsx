@@ -19,7 +19,7 @@ export default async function CustomersPage() {
       <PageHeader title="Customers" description="People and businesses you sell eggs, chicks or chicken to." />
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
           Add a customer
         </h2>
         <CreateCustomerForm />
@@ -39,7 +39,7 @@ export default async function CustomersPage() {
           <TBody>
             {customers.map((c) => (
               <tr key={c.id}>
-                <Td className="font-medium text-zinc-900 dark:text-zinc-100">
+                <Td className="font-medium text-stone-900 dark:text-stone-100">
                   <Link href={`/customers/${c.id}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
                     {c.name}
                   </Link>

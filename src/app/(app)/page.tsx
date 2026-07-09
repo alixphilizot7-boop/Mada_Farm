@@ -1,6 +1,7 @@
+import { Bird, Egg, HeartCrack, PackageSearch, Wallet, Receipt } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { Badge, Card, LinkButton, PageHeader } from "@/components/ui";
+import { Badge, Card, LinkButton, PageHeader, StatCard } from "@/components/ui";
 import { formatMoney, formatDate } from "@/lib/format";
 import { EggTrendChart } from "@/components/charts/egg-trend-chart";
 import { CashFlowChart } from "@/components/charts/cash-flow-chart";
@@ -119,33 +120,39 @@ export default async function DashboardPage() {
       />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Active flocks</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-            {flocks.length} <span className="text-sm font-normal text-zinc-400">· {totalBirds} birds</span>
-          </p>
-        </Card>
-        <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Eggs today / this week</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-            {eggsToday} <span className="text-sm font-normal text-zinc-400">/ {eggsThisWeek}</span>
-          </p>
-        </Card>
-        <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Lost this month</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{mortalityThisMonth}</p>
-        </Card>
-        <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Low stock items</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-            {lowStockItems.length}
-          </p>
-          {lowStockItems.length > 0 && (
-            <p className="mt-1 truncate text-xs text-amber-600 dark:text-amber-400">
-              {lowStockItems.map((i) => i.name).join(", ")}
-            </p>
-          )}
-        </Card>
+        <StatCard
+          icon={Bird}
+          label="Active flocks"
+          value={
+            <>
+              {flocks.length} <span className="text-sm font-normal text-stone-400">· {totalBirds} birds</span>
+            </>
+          }
+        />
+        <StatCard
+          icon={Egg}
+          tone="amber"
+          label="Eggs today / this week"
+          value={
+            <>
+              {eggsToday} <span className="text-sm font-normal text-stone-400">/ {eggsThisWeek}</span>
+            </>
+          }
+        />
+        <StatCard icon={HeartCrack} tone="red" label="Lost this month" value={mortalityThisMonth} />
+        <StatCard
+          icon={PackageSearch}
+          tone={lowStockItems.length > 0 ? "amber" : "stone"}
+          label="Low stock items"
+          value={lowStockItems.length}
+          hint={
+            lowStockItems.length > 0 && (
+              <p className="mt-1 truncate text-xs text-amber-600 dark:text-amber-400">
+                {lowStockItems.map((i) => i.name).join(", ")}
+              </p>
+            )
+          }
+        />
       </div>
 
       {vaccinationAlerts.length > 0 && (
@@ -170,18 +177,8 @@ export default async function DashboardPage() {
 
       {isAdmin && (
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          <Card>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">Net cash balance</p>
-            <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-              {formatMoney(totalIncome - totalExpense)}
-            </p>
-          </Card>
-          <Card>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">Outstanding invoices</p>
-            <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-              {formatMoney(outstanding)}
-            </p>
-          </Card>
+          <StatCard icon={Wallet} tone="emerald" label="Net cash balance" value={formatMoney(totalIncome - totalExpense)} />
+          <StatCard icon={Receipt} tone="blue" label="Outstanding invoices" value={formatMoney(outstanding)} />
           <Card className="flex flex-col justify-center gap-2">
             <LinkButton href="/invoices/new">New invoice</LinkButton>
           </Card>
@@ -190,14 +187,14 @@ export default async function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+          <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">
             Egg production — last 14 days
           </h2>
           <EggTrendChart data={eggChartData} />
         </Card>
 
         <Card>
-          <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+          <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">
             Chick production — last 6 months
           </h2>
           <ChickProductionChart data={chickChartData} />
@@ -205,14 +202,14 @@ export default async function DashboardPage() {
 
         {isAdmin ? (
           <Card>
-            <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+            <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">
               Cash flow — last 8 weeks
             </h2>
             <CashFlowChart data={cashChartData} />
           </Card>
         ) : (
           <Card>
-            <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200">Flocks</h2>
+            <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">Flocks</h2>
             <div className="flex flex-wrap gap-2">
               {flocks.map((f) => (
                 <Badge key={f.id} tone="green">

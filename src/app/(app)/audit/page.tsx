@@ -41,7 +41,7 @@ export default async function AuditPage({
         <div className="flex flex-wrap gap-2">
           <a
             href="/audit"
-            className={`rounded-full px-3 py-1 text-xs font-medium ${!entity ? "bg-emerald-600 text-white" : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"}`}
+            className={`rounded-full px-3 py-1 text-xs font-medium ${!entity ? "bg-emerald-600 text-white" : "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300"}`}
           >
             All
           </a>
@@ -49,7 +49,7 @@ export default async function AuditPage({
             <a
               key={e.entity}
               href={`/audit?entity=${e.entity}`}
-              className={`rounded-full px-3 py-1 text-xs font-medium ${entity === e.entity ? "bg-emerald-600 text-white" : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"}`}
+              className={`rounded-full px-3 py-1 text-xs font-medium ${entity === e.entity ? "bg-emerald-600 text-white" : "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300"}`}
             >
               {e.entity}
             </a>

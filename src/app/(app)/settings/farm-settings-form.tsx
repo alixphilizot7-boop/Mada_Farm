@@ -20,7 +20,7 @@ export function FarmSettingsForm({ settings }: { settings: FarmSettings }) {
           className={inputClass}
         />
       </Field>
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+      <p className="text-xs text-stone-500 dark:text-stone-400">
         Used to work out which year of your business plan you&apos;re currently in.
       </p>
       {error && <p className="text-sm text-red-600">{error}</p>}

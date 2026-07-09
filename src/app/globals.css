@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --chart-grid: #e1e0d9;
-  --chart-axis: #c3c2b7;
-  --chart-muted: #898781;
+  --background: #fbf9f3;
+  --foreground: #211c15;
+  --chart-grid: #e6e0d1;
+  --chart-axis: #c9bf9f;
+  --chart-muted: #8a8067;
   --chart-emerald: #059669;
   --chart-red: #dc2626;
 }
@@ -15,15 +15,16 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-fraunces);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --chart-grid: #2c2c2a;
-    --chart-axis: #383835;
-    --chart-muted: #898781;
+    --background: #16130e;
+    --foreground: #f1ede3;
+    --chart-grid: #33301f;
+    --chart-axis: #4a4530;
+    --chart-muted: #9a917a;
     --chart-emerald: #34d399;
     --chart-red: #f87171;
   }

@@ -66,40 +66,40 @@ export default async function InventoryItemPage({
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Current stock</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+          <p className="text-xs text-stone-500 dark:text-stone-400">Current stock</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">
             {item.currentStock} {item.unit}
           </p>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Low stock alert level</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+          <p className="text-xs text-stone-500 dark:text-stone-400">Low stock alert level</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">
             {item.reorderLevel} {item.unit}
           </p>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Status</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Status</p>
           {isLowStock ? <Badge tone="amber">Low stock</Badge> : <Badge tone="green">OK</Badge>}
         </Card>
       </div>
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">Edit item</h2>
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">Edit item</h2>
         <EditItemForm item={item} />
       </Card>
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
           Correct stock level
         </h2>
-        <p className="mb-4 text-xs text-zinc-500 dark:text-zinc-400">
+        <p className="mb-4 text-xs text-stone-500 dark:text-stone-400">
           Use this if a physical count doesn&apos;t match the system (spillage, spoilage, counting
           error) — it will be recorded in the audit log.
         </p>
         <AdjustStockForm item={item} />
       </Card>
 
-      <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200">Stock ledger</h2>
+      <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">Stock ledger</h2>
       {display.length === 0 ? (
         <EmptyState>No purchases or usage recorded for this item yet.</EmptyState>
       ) : (

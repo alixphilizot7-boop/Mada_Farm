@@ -40,7 +40,7 @@ export default async function EditCashTransactionPage({
       <PageHeader title="Edit Cash Flow Entry" />
       <Card>
         {source ? (
-          <p className="text-sm text-zinc-600 dark:text-zinc-300">
+          <p className="text-sm text-stone-600 dark:text-stone-300">
             This entry was auto-generated from{" "}
             <Link href={source.href} className="text-emerald-700 hover:underline dark:text-emerald-400">
               {source.label}

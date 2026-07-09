@@ -37,23 +37,23 @@ export default async function CapexPage() {
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Planned budget</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{formatMoney(totalPlanned)}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Planned budget</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">{formatMoney(totalPlanned)}</p>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Actually spent</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Actually spent</p>
           <p className="text-xl font-semibold text-emerald-600">{formatMoney(totalSpent)}</p>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Items purchased</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+          <p className="text-xs text-stone-500 dark:text-stone-400">Items purchased</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">
             {purchasedCount} / {items.length}
           </p>
         </Card>
       </div>
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
           Add a budget item
         </h2>
         <CreateItemForm />
@@ -83,7 +83,7 @@ export default async function CapexPage() {
                   {item.link && (
                     <>
                       {" · "}
-                      <a href={item.link} target="_blank" rel="noreferrer" className="text-xs text-zinc-400 hover:underline">
+                      <a href={item.link} target="_blank" rel="noreferrer" className="text-xs text-stone-400 hover:underline">
                         link
                       </a>
                     </>

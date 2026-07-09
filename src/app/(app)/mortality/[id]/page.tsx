@@ -22,7 +22,7 @@ export default async function EditMortalityPage({
       <PageHeader title="Edit Mortality Record" />
       <Card>
         {log.healthRecordId ? (
-          <p className="text-sm text-zinc-600 dark:text-zinc-300">
+          <p className="text-sm text-stone-600 dark:text-stone-300">
             This loss was auto-logged from a health record.{" "}
             <Link href={`/health/${log.healthRecordId}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
               Edit the health record instead

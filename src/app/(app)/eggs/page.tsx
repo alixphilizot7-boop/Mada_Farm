@@ -26,17 +26,17 @@ export default async function EggsPage() {
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2">
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Whole eggs (last 100 entries)</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{totalWhole}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Whole eggs (last 100 entries)</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">{totalWhole}</p>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Broken eggs (last 100 entries)</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{totalBroken}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Broken eggs (last 100 entries)</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">{totalBroken}</p>
         </Card>
       </div>
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
           Log today&apos;s collection
         </h2>
         {flocks.length === 0 ? (

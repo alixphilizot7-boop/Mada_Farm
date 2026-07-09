@@ -20,7 +20,7 @@ export default async function UsagePage() {
       <PageHeader title="Usage" description="Feed and water given to the chickens." />
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
           Log feed/water given
         </h2>
         {items.length === 0 ? (

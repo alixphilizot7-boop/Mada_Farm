@@ -18,7 +18,7 @@ export default async function FlocksPage() {
       <PageHeader title="Flocks" description="Every batch of chickens on the farm, tracked from day one." />
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
           Register a new flock
         </h2>
         <CreateFlockForm />

@@ -92,14 +92,14 @@ export default async function InvoiceDetailPage({
 
         <div className="ml-auto mt-4 max-w-xs space-y-1 text-sm">
           <div className="flex justify-between">
-            <span className="text-zinc-500">Subtotal</span>
+            <span className="text-stone-500">Subtotal</span>
             <span>{formatMoney(invoice.subtotal)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-zinc-500">Tax</span>
+            <span className="text-stone-500">Tax</span>
             <span>{formatMoney(invoice.tax)}</span>
           </div>
-          <div className="flex justify-between text-base font-semibold text-zinc-900 dark:text-zinc-50">
+          <div className="flex justify-between text-base font-semibold text-stone-900 dark:text-stone-50">
             <span>Total</span>
             <span>{formatMoney(invoice.total)}</span>
           </div>
@@ -108,7 +108,7 @@ export default async function InvoiceDetailPage({
 
       {invoice.notes && (
         <Card>
-          <p className="text-sm text-zinc-600 dark:text-zinc-300">{invoice.notes}</p>
+          <p className="text-sm text-stone-600 dark:text-stone-300">{invoice.notes}</p>
         </Card>
       )}
     </div>

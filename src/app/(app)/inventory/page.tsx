@@ -33,7 +33,7 @@ export default async function InventoryPage() {
       )}
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
           Add inventory item
         </h2>
         <CreateItemForm />
@@ -53,7 +53,7 @@ export default async function InventoryPage() {
           <TBody>
             {items.map((item) => (
               <tr key={item.id}>
-                <Td className="font-medium text-zinc-900 dark:text-zinc-100">
+                <Td className="font-medium text-stone-900 dark:text-stone-100">
                   <Link href={`/inventory/${item.id}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
                     {item.name}
                   </Link>

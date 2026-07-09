@@ -19,7 +19,7 @@ export default async function PurchasesPage() {
       <PageHeader title="Purchases" description="Feed, water and supplies bought for the flocks." />
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
           Record a purchase
         </h2>
         {items.length === 0 ? (

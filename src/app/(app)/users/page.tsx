@@ -19,7 +19,7 @@ export default async function UsersPage() {
       <PageHeader title="Users" description="Manage who can sign in to Mada Farm." />
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
           Add a new account
         </h2>
         <CreateUserForm />

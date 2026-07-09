@@ -9,7 +9,7 @@ function ProgressBar({ pct }: { pct: number }) {
   const clamped = Math.max(0, Math.min(100, pct));
   const tone = pct >= 100 ? "bg-emerald-600" : pct >= 60 ? "bg-blue-500" : "bg-amber-500";
   return (
-    <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+    <div className="h-2 w-full overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
       <div className={`h-full rounded-full ${tone}`} style={{ width: `${clamped}%` }} />
     </div>
   );
@@ -29,7 +29,7 @@ export default async function BusinessPlanPage() {
       <div>
         <PageHeader title="Business Plan" description="Actual performance vs. your 5-year plan targets." />
         <Card>
-          <p className="text-sm text-zinc-600 dark:text-zinc-300">
+          <p className="text-sm text-stone-600 dark:text-stone-300">
             Farm operations are set to start on {formatDate(settings.farmStartDate)} — {daysUntilStart} day(s) from
             now. Tracking against Year 1 targets will begin then.
           </p>
@@ -92,13 +92,13 @@ export default async function BusinessPlanPage() {
               const pct = r.target !== 0 ? (r.actual / r.target) * 100 : r.actual >= 0 ? 100 : 0;
               return (
                 <tr key={r.label}>
-                  <Td className="font-medium text-zinc-900 dark:text-zinc-100">{r.label}</Td>
+                  <Td className="font-medium text-stone-900 dark:text-stone-100">{r.label}</Td>
                   <Td>{r.isMoney ? formatMoney(r.target) : r.target}</Td>
                   <Td>{r.isMoney ? formatMoney(r.actual) : r.actual}</Td>
                   <Td className="min-w-[160px]">
                     <div className="flex items-center gap-2">
                       <ProgressBar pct={pct} />
-                      <span className="whitespace-nowrap text-xs text-zinc-500">{pct.toFixed(0)}%</span>
+                      <span className="whitespace-nowrap text-xs text-stone-500">{pct.toFixed(0)}%</span>
                     </div>
                   </Td>
                 </tr>

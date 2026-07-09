@@ -38,18 +38,18 @@ export default async function CapexItemPage({
 
       {item.status === "PURCHASED" && (
         <Card className="mb-6">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Actually paid</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Actually paid</p>
           <p className="text-xl font-semibold text-emerald-600">
             {item.actualQuantity} × {formatMoney(item.actualUnitCost ?? 0)} = {formatMoney(item.actualTotal ?? 0)}
           </p>
           {item.purchaseDate && (
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">on {formatDate(item.purchaseDate)}</p>
+            <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">on {formatDate(item.purchaseDate)}</p>
           )}
         </Card>
       )}
 
       <Card>
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">Edit item</h2>
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">Edit item</h2>
         <EditItemForm item={item} />
       </Card>
     </div>

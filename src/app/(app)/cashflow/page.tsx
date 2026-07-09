@@ -42,26 +42,26 @@ export default async function CashFlowPage() {
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Total income</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Total income</p>
           <p className="text-xl font-semibold text-emerald-600">{formatMoney(totalIncome)}</p>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Total expenses</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Total expenses</p>
           <p className="text-xl font-semibold text-red-600">{formatMoney(totalExpense)}</p>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Net balance</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+          <p className="text-xs text-stone-500 dark:text-stone-400">Net balance</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">
             {formatMoney(totalIncome - totalExpense)}
           </p>
         </Card>
       </div>
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
           Add a manual entry
         </h2>
-        <p className="mb-4 text-xs text-zinc-500 dark:text-zinc-400">
+        <p className="mb-4 text-xs text-stone-500 dark:text-stone-400">
           Purchases, health costs and paid invoices are logged here automatically. Use this for
           anything else (transport, equipment, other income, etc).
         </p>

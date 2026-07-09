@@ -21,12 +21,12 @@ export default async function MortalityPage() {
       <PageHeader title="Mortality" description="Track losses so you can trace back causes and trends." />
 
       <Card className="mb-6">
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">Total lost (last 100 entries)</p>
-        <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{totalLost}</p>
+        <p className="text-xs text-stone-500 dark:text-stone-400">Total lost (last 100 entries)</p>
+        <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">{totalLost}</p>
       </Card>
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
           Log a loss
         </h2>
         {flocks.length === 0 ? (

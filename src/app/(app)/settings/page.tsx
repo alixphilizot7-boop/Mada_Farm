@@ -15,13 +15,13 @@ export default async function SettingsPage() {
       <PageHeader title="Settings" />
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">Business plan</h2>
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">Business plan</h2>
         <FarmSettingsForm settings={settings} />
       </Card>
 
       <Card>
-        <h2 className="mb-2 text-sm font-semibold text-zinc-700 dark:text-zinc-200">Data backup</h2>
-        <p className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
+        <h2 className="mb-2 text-sm font-semibold text-stone-700 dark:text-stone-200">Data backup</h2>
+        <p className="mb-4 text-sm text-stone-500 dark:text-stone-400">
           Download a full copy of the farm database. Keep it somewhere safe — it contains everything
           in Mada Farm.
         </p>

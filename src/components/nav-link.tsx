@@ -5,7 +5,15 @@ import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 import type { ReactNode } from "react";
 
-export function NavLink({ href, children }: { href: string; children: ReactNode }) {
+export function NavLink({
+  href,
+  children,
+  icon,
+}: {
+  href: string;
+  children: ReactNode;
+  icon?: ReactNode;
+}) {
   const pathname = usePathname();
   const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
 
@@ -13,13 +21,18 @@ export function NavLink({ href, children }: { href: string; children: ReactNode 
     <Link
       href={href}
       className={clsx(
-        "block shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        "flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
         active
-          ? "bg-emerald-600 text-white"
-          : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          ? "bg-emerald-600 text-white shadow-sm"
+          : "text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
       )}
     >
-      {children}
+      {icon && (
+        <span className={clsx("flex h-4 w-4 shrink-0", active ? "text-white" : "text-stone-400 dark:text-stone-500")}>
+          {icon}
+        </span>
+      )}
+      <span className="truncate">{children}</span>
     </Link>
   );
 }

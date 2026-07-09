@@ -27,21 +27,21 @@ export default async function ChicksPage() {
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Eggs set (last 100 entries)</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{totalEggsSet}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Eggs set (last 100 entries)</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">{totalEggsSet}</p>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Chicks hatched (last 100 entries)</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{totalHatched}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Chicks hatched (last 100 entries)</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">{totalHatched}</p>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Average hatch rate</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{avgHatchRate.toFixed(0)}%</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Average hatch rate</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">{avgHatchRate.toFixed(0)}%</p>
         </Card>
       </div>
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
           Log a hatch
         </h2>
         <CreateChickHatchForm flocks={flocks} />

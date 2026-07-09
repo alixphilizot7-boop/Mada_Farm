@@ -40,10 +40,10 @@ export default async function ReportsPage({
 
       <Card className="mb-6">
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-zinc-500 dark:text-zinc-400">View:</span>
+          <span className="text-stone-500 dark:text-stone-400">View:</span>
           <a
             href={`/reports?year=${year}`}
-            className={`rounded-full px-3 py-1 text-xs font-medium ${month === undefined ? "bg-emerald-600 text-white" : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"}`}
+            className={`rounded-full px-3 py-1 text-xs font-medium ${month === undefined ? "bg-emerald-600 text-white" : "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300"}`}
           >
             Full year
           </a>
@@ -51,12 +51,12 @@ export default async function ReportsPage({
             <a
               key={name}
               href={`/reports?year=${year}&month=${i}`}
-              className={`rounded-full px-3 py-1 text-xs font-medium ${month === i ? "bg-emerald-600 text-white" : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"}`}
+              className={`rounded-full px-3 py-1 text-xs font-medium ${month === i ? "bg-emerald-600 text-white" : "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300"}`}
             >
               {name.slice(0, 3)}
             </a>
           ))}
-          <span className="mx-2 text-zinc-300 dark:text-zinc-700">|</span>
+          <span className="mx-2 text-stone-300 dark:text-stone-700">|</span>
           <a href={`/reports?year=${year - 1}${month !== undefined ? `&month=${month}` : ""}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
             ← {year - 1}
           </a>
@@ -68,26 +68,26 @@ export default async function ReportsPage({
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Total revenue</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Total revenue</p>
           <p className="text-xl font-semibold text-emerald-600">{formatMoney(report.totalIncome)}</p>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Total costs</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Total costs</p>
           <p className="text-xl font-semibold text-red-600">{formatMoney(report.totalExpense)}</p>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Net result</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+          <p className="text-xs text-stone-500 dark:text-stone-400">Net result</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">
             {formatMoney(report.net)}{" "}
-            <span className="text-sm font-normal text-zinc-400">({report.marginPct.toFixed(1)}% margin)</span>
+            <span className="text-sm font-normal text-stone-400">({report.marginPct.toFixed(1)}% margin)</span>
           </p>
         </Card>
       </div>
 
       <Card className="mb-6">
-        <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200">Revenue</h2>
+        <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">Revenue</h2>
         {report.incomeByCategory.length === 0 ? (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">No income recorded for this period.</p>
+          <p className="text-sm text-stone-500 dark:text-stone-400">No income recorded for this period.</p>
         ) : (
           <Table>
             <THead>
@@ -107,9 +107,9 @@ export default async function ReportsPage({
       </Card>
 
       <Card>
-        <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200">Costs</h2>
+        <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">Costs</h2>
         {report.expenseByCategory.length === 0 ? (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">No expenses recorded for this period.</p>
+          <p className="text-sm text-stone-500 dark:text-stone-400">No expenses recorded for this period.</p>
         ) : (
           <Table>
             <THead>

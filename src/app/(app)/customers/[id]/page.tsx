@@ -25,11 +25,11 @@ export default async function CustomerDetailPage({
       <PageHeader title={customer.name} />
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">Edit customer</h2>
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">Edit customer</h2>
         <EditCustomerForm customer={customer} />
       </Card>
 
-      <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200">Invoices</h2>
+      <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">Invoices</h2>
       {customer.invoices.length === 0 ? (
         <EmptyState>No invoices for this customer yet.</EmptyState>
       ) : (

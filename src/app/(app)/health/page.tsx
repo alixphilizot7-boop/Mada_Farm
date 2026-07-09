@@ -25,7 +25,7 @@ export default async function HealthPage() {
       <PageHeader title="Health" description="Illness, treatment, vaccination and checkup records." />
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
           Log a health event
         </h2>
         {flocks.length === 0 ? (

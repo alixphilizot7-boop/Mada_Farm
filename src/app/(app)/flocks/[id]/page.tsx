@@ -85,31 +85,31 @@ export default async function FlockDetailPage({
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Status</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Status</p>
           <Badge tone={STATUS_TONE[flock.status]}>{flock.status.replace("_", " ")}</Badge>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Current headcount</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-            {flock.currentCount} <span className="text-sm font-normal text-zinc-400">/ {flock.initialCount}</span>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Current headcount</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">
+            {flock.currentCount} <span className="text-sm font-normal text-stone-400">/ {flock.initialCount}</span>
           </p>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Eggs collected (recent)</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{totalEggs}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Eggs collected (recent)</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">{totalEggs}</p>
         </Card>
         <Card>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Lost (recent)</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{totalLost}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Lost (recent)</p>
+          <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">{totalLost}</p>
         </Card>
       </div>
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200">Edit flock</h2>
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">Edit flock</h2>
         <EditFlockForm flock={flock} />
       </Card>
 
-      <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+      <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">
         Activity timeline
       </h2>
       {timeline.length === 0 ? (
