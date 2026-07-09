@@ -1,0 +1,228 @@
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { Badge, Card, LinkButton, PageHeader } from "@/components/ui";
+import { formatMoney, formatDate } from "@/lib/format";
+import { EggTrendChart } from "@/components/charts/egg-trend-chart";
+import { CashFlowChart } from "@/components/charts/cash-flow-chart";
+import { ChickProductionChart } from "@/components/charts/chick-production-chart";
+import { computeVaccinationAlerts } from "@/lib/vaccination-schedule";
+
+function startOfDay(d: Date) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+export default async function DashboardPage() {
+  const session = await auth();
+  const isAdmin = session?.user.role === "ADMIN";
+  const now = new Date();
+
+  const eggRangeStart = startOfDay(now);
+  eggRangeStart.setDate(eggRangeStart.getDate() - 13);
+
+  const cashRangeStart = startOfDay(now);
+  cashRangeStart.setDate(cashRangeStart.getDate() - 7 * 8);
+
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const chickRangeStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+  const [flocks, eggLogs, chickHatches, items, mortalityAgg, vaccinationHistory, cashTxns, incomeAgg, expenseAgg, outstandingAgg] =
+    await Promise.all([
+      prisma.flock.findMany({ where: { status: "ACTIVE" } }),
+      prisma.eggLog.findMany({ where: { date: { gte: eggRangeStart } } }),
+      prisma.chickHatch.findMany({ where: { date: { gte: chickRangeStart } } }),
+      prisma.inventoryItem.findMany(),
+      prisma.mortalityLog.aggregate({ _sum: { quantity: true }, where: { date: { gte: monthStart } } }),
+      prisma.healthRecord.findMany({
+        where: { vaccinationType: { not: null } },
+        select: { flockId: true, vaccinationType: true, date: true },
+      }),
+      isAdmin ? prisma.cashTransaction.findMany({ where: { date: { gte: cashRangeStart } } }) : Promise.resolve([]),
+      isAdmin
+        ? prisma.cashTransaction.aggregate({ _sum: { amount: true }, where: { type: "INCOME" } })
+        : Promise.resolve({ _sum: { amount: 0 } }),
+      isAdmin
+        ? prisma.cashTransaction.aggregate({ _sum: { amount: true }, where: { type: "EXPENSE" } })
+        : Promise.resolve({ _sum: { amount: 0 } }),
+      isAdmin
+        ? prisma.invoice.aggregate({ _sum: { total: true }, where: { status: { in: ["SENT", "OVERDUE"] } } })
+        : Promise.resolve({ _sum: { total: 0 } }),
+    ]);
+
+  const totalBirds = flocks.reduce((s, f) => s + f.currentCount, 0);
+  const lowStockItems = items.filter((i) => i.currentStock <= i.reorderLevel);
+  const vaccinationAlerts = computeVaccinationAlerts(flocks, vaccinationHistory, now);
+
+  const eggDays = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date(eggRangeStart);
+    d.setDate(d.getDate() + i);
+    return { date: d, eggs: 0 };
+  });
+  for (const log of eggLogs) {
+    const idx = Math.floor((startOfDay(log.date).getTime() - eggRangeStart.getTime()) / 86400000);
+    if (idx >= 0 && idx < 14) eggDays[idx].eggs += log.wholeCount;
+  }
+  const eggChartData = eggDays.map((d) => ({
+    label: d.date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    eggs: d.eggs,
+  }));
+  const eggsToday = eggDays[13].eggs;
+  const eggsThisWeek = eggDays.slice(7).reduce((s, d) => s + d.eggs, 0);
+
+  const chickMonths = Array.from({ length: 6 }, (_, i) => {
+    const monthDate = new Date(chickRangeStart.getFullYear(), chickRangeStart.getMonth() + i, 1);
+    return { monthDate, chicks: 0 };
+  });
+  for (const hatch of chickHatches) {
+    const idx =
+      (hatch.date.getFullYear() - chickRangeStart.getFullYear()) * 12 +
+      (hatch.date.getMonth() - chickRangeStart.getMonth());
+    if (idx >= 0 && idx < 6) chickMonths[idx].chicks += hatch.chicksHatched;
+  }
+  const chickChartData = chickMonths.map((m) => ({
+    label: m.monthDate.toLocaleDateString("en-US", { month: "short", year: "2-digit" }),
+    chicks: m.chicks,
+  }));
+
+  const cashWeeks = Array.from({ length: 8 }, (_, i) => {
+    const weekStart = new Date(cashRangeStart);
+    weekStart.setDate(weekStart.getDate() + i * 7);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+    return { weekStart, weekEnd, income: 0, expense: 0 };
+  });
+  for (const t of cashTxns) {
+    const idx = cashWeeks.findIndex((w) => t.date >= w.weekStart && t.date < w.weekEnd);
+    if (idx >= 0) {
+      if (t.type === "INCOME") cashWeeks[idx].income += t.amount;
+      else cashWeeks[idx].expense += t.amount;
+    }
+  }
+  const cashChartData = cashWeeks.map((w) => ({
+    label: w.weekStart.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    income: w.income,
+    expense: w.expense,
+  }));
+
+  const totalIncome = incomeAgg._sum.amount ?? 0;
+  const totalExpense = expenseAgg._sum.amount ?? 0;
+  const outstanding = outstandingAgg._sum.total ?? 0;
+  const mortalityThisMonth = mortalityAgg._sum.quantity ?? 0;
+
+  return (
+    <div>
+      <PageHeader
+        title={`Welcome, ${session?.user?.name ?? ""}`}
+        description="Here's what's happening on the farm."
+      />
+
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">Active flocks</p>
+          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+            {flocks.length} <span className="text-sm font-normal text-zinc-400">· {totalBirds} birds</span>
+          </p>
+        </Card>
+        <Card>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">Eggs today / this week</p>
+          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+            {eggsToday} <span className="text-sm font-normal text-zinc-400">/ {eggsThisWeek}</span>
+          </p>
+        </Card>
+        <Card>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">Lost this month</p>
+          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{mortalityThisMonth}</p>
+        </Card>
+        <Card>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">Low stock items</p>
+          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+            {lowStockItems.length}
+          </p>
+          {lowStockItems.length > 0 && (
+            <p className="mt-1 truncate text-xs text-amber-600 dark:text-amber-400">
+              {lowStockItems.map((i) => i.name).join(", ")}
+            </p>
+          )}
+        </Card>
+      </div>
+
+      {vaccinationAlerts.length > 0 && (
+        <Card className="mb-6 border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
+          <p className="mb-2 text-sm font-medium text-amber-800 dark:text-amber-300">
+            Vaccination &amp; biosecurity due
+          </p>
+          <ul className="space-y-1 text-sm text-amber-800 dark:text-amber-300">
+            {vaccinationAlerts.slice(0, 8).map((a, i) => (
+              <li key={i}>
+                <span className="font-medium">{a.flockName}</span> — {a.rule.name}{" "}
+                {a.overdue ? (
+                  <span className="font-semibold">overdue since {formatDate(a.dueDate)}</span>
+                ) : (
+                  <span>due {formatDate(a.dueDate)}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {isAdmin && (
+        <div className="mb-6 grid gap-4 sm:grid-cols-3">
+          <Card>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">Net cash balance</p>
+            <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+              {formatMoney(totalIncome - totalExpense)}
+            </p>
+          </Card>
+          <Card>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">Outstanding invoices</p>
+            <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+              {formatMoney(outstanding)}
+            </p>
+          </Card>
+          <Card className="flex flex-col justify-center gap-2">
+            <LinkButton href="/invoices/new">New invoice</LinkButton>
+          </Card>
+        </div>
+      )}
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+            Egg production — last 14 days
+          </h2>
+          <EggTrendChart data={eggChartData} />
+        </Card>
+
+        <Card>
+          <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+            Chick production — last 6 months
+          </h2>
+          <ChickProductionChart data={chickChartData} />
+        </Card>
+
+        {isAdmin ? (
+          <Card>
+            <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+              Cash flow — last 8 weeks
+            </h2>
+            <CashFlowChart data={cashChartData} />
+          </Card>
+        ) : (
+          <Card>
+            <h2 className="mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200">Flocks</h2>
+            <div className="flex flex-wrap gap-2">
+              {flocks.map((f) => (
+                <Badge key={f.id} tone="green">
+                  {f.name} · {f.currentCount}
+                </Badge>
+              ))}
+            </div>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,370 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+model FarmSettings {
+  id            String   @id @default("singleton")
+  farmStartDate DateTime
+  updatedAt     DateTime @updatedAt
+}
+
+model PlanYear {
+  id               String @id @default(cuid())
+  year             Int    @unique
+  targetEggs       Int
+  targetChicksSold Int
+  targetRevenue    Float
+  targetCosts      Float
+  targetNetResult  Float
+}
+
+enum FlockStatus {
+  ACTIVE
+  SOLD_OUT
+  CLOSED
+}
+
+enum InventoryType {
+  FEED
+  WATER
+  SUPPLEMENT
+  MEDICINE
+  OTHER
+}
+
+enum HealthRecordType {
+  ILLNESS
+  VACCINATION
+  TREATMENT
+  CHECKUP
+}
+
+enum HealthOutcome {
+  RECOVERED
+  ONGOING
+  DECEASED
+}
+
+enum ProductType {
+  EGGS
+  CHICKS
+  CHICKEN
+  OTHER
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum CashType {
+  INCOME
+  EXPENSE
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(STAFF)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  eggLogs       EggLog[]
+  purchases     Purchase[]
+  usages        Usage[]
+  healthRecords HealthRecord[]
+  mortalityLogs MortalityLog[]
+  invoices      Invoice[]
+  cashTxns      CashTransaction[]
+  auditLogs     AuditLog[]
+  capexItems    CapexItem[]
+  chickHatches  ChickHatch[]
+}
+
+model Flock {
+  id           String      @id @default(cuid())
+  name         String
+  breed        String?
+  startDate    DateTime
+  initialCount Int
+  currentCount Int
+  status       FlockStatus @default(ACTIVE)
+  notes        String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  eggLogs       EggLog[]
+  usages        Usage[]
+  healthRecords HealthRecord[]
+  mortalityLogs MortalityLog[]
+  chickHatches  ChickHatch[]
+
+  @@index([status])
+}
+
+model EggLog {
+  id           String   @id @default(cuid())
+  date         DateTime
+  flockId      String
+  flock        Flock    @relation(fields: [flockId], references: [id])
+  wholeCount   Int
+  brokenCount  Int      @default(0)
+  notes        String?
+  recordedById String
+  recordedBy   User     @relation(fields: [recordedById], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@index([date])
+  @@index([flockId])
+}
+
+model ChickHatch {
+  id            String   @id @default(cuid())
+  date          DateTime
+  eggsSet       Int
+  chicksHatched Int
+  flockId       String?
+  flock         Flock?   @relation(fields: [flockId], references: [id])
+  notes         String?
+  recordedById  String
+  recordedBy    User     @relation(fields: [recordedById], references: [id])
+  createdAt     DateTime @default(now())
+
+  @@index([date])
+  @@index([flockId])
+}
+
+model InventoryItem {
+  id           String        @id @default(cuid())
+  name         String
+  type         InventoryType
+  unit         String
+  currentStock Float         @default(0)
+  reorderLevel Float         @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  purchases Purchase[]
+  usages    Usage[]
+
+  @@unique([name])
+}
+
+model Purchase {
+  id           String        @id @default(cuid())
+  date         DateTime
+  itemId       String
+  item         InventoryItem @relation(fields: [itemId], references: [id])
+  quantity     Float
+  unitCost     Float
+  totalCost    Float
+  supplier     String?
+  notes        String?
+  recordedById String
+  recordedBy   User          @relation(fields: [recordedById], references: [id])
+  createdAt    DateTime      @default(now())
+
+  cashTxn CashTransaction?
+
+  @@index([date])
+}
+
+model Usage {
+  id           String        @id @default(cuid())
+  date         DateTime
+  itemId       String
+  item         InventoryItem @relation(fields: [itemId], references: [id])
+  flockId      String?
+  flock        Flock?        @relation(fields: [flockId], references: [id])
+  quantity     Float
+  notes        String?
+  recordedById String
+  recordedBy   User          @relation(fields: [recordedById], references: [id])
+  createdAt    DateTime      @default(now())
+
+  @@index([date])
+}
+
+model HealthRecord {
+  id              String           @id @default(cuid())
+  date            DateTime
+  flockId         String
+  flock           Flock            @relation(fields: [flockId], references: [id])
+  type            HealthRecordType
+  vaccinationType String?
+  affectedCount   Int              @default(0)
+  diagnosis       String?
+  treatment       String?
+  medicineUsed    String?
+  cost            Float            @default(0)
+  outcome         HealthOutcome    @default(ONGOING)
+  notes           String?
+  recordedById    String
+  recordedBy      User             @relation(fields: [recordedById], references: [id])
+  createdAt       DateTime         @default(now())
+
+  cashTxn      CashTransaction?
+  mortalityLog MortalityLog?
+
+  @@index([date])
+  @@index([flockId])
+}
+
+model MortalityLog {
+  id             String        @id @default(cuid())
+  date           DateTime
+  flockId        String
+  flock          Flock         @relation(fields: [flockId], references: [id])
+  quantity       Int
+  cause          String?
+  notes          String?
+  healthRecordId String?       @unique
+  healthRecord   HealthRecord? @relation(fields: [healthRecordId], references: [id])
+  recordedById   String
+  recordedBy     User          @relation(fields: [recordedById], references: [id])
+  createdAt      DateTime      @default(now())
+
+  @@index([date])
+  @@index([flockId])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoices Invoice[]
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  customerId    String
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  issueDate     DateTime
+  dueDate       DateTime?
+  status        InvoiceStatus @default(DRAFT)
+  subtotal      Float
+  tax           Float         @default(0)
+  total         Float
+  notes         String?
+  paidAt        DateTime?
+  createdById   String
+  createdBy     User          @relation(fields: [createdById], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items   InvoiceItem[]
+  cashTxn CashTransaction?
+
+  @@index([status])
+  @@index([issueDate])
+}
+
+model InvoiceItem {
+  id          String      @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productType ProductType
+  description String
+  quantity    Float
+  unitPrice   Float
+  total       Float
+}
+
+model CashTransaction {
+  id             String        @id @default(cuid())
+  date           DateTime
+  type           CashType
+  category       String
+  amount         Float
+  description    String?
+  invoiceId      String?       @unique
+  invoice        Invoice?      @relation(fields: [invoiceId], references: [id])
+  purchaseId     String?       @unique
+  purchase       Purchase?     @relation(fields: [purchaseId], references: [id])
+  healthRecordId String?       @unique
+  healthRecord   HealthRecord? @relation(fields: [healthRecordId], references: [id])
+  capexItemId    String?       @unique
+  capexItem      CapexItem?    @relation(fields: [capexItemId], references: [id])
+  recordedById   String
+  recordedBy     User          @relation(fields: [recordedById], references: [id])
+  createdAt      DateTime      @default(now())
+
+  @@index([date])
+  @@index([type])
+}
+
+enum CapexStatus {
+  PLANNED
+  ORDERED
+  PURCHASED
+}
+
+model CapexItem {
+  id              String      @id @default(cuid())
+  category        String
+  name            String
+  specs           String?
+  status          CapexStatus @default(PLANNED)
+  plannedQuantity Float?
+  plannedUnitCost Float?
+  plannedTotal    Float?
+  actualQuantity  Float?
+  actualUnitCost  Float?
+  actualTotal     Float?
+  supplier        String?
+  link            String?
+  purchaseDate    DateTime?
+  notes           String?
+  createdById     String
+  createdBy       User        @relation(fields: [createdById], references: [id])
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  cashTxn CashTransaction?
+
+  @@index([category])
+  @@index([status])
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  entity    String
+  entityId  String
+  action    AuditAction
+  summary   String
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  createdAt DateTime    @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}

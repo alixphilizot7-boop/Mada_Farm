@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local sqlite database (dev only, never committed)
+prisma/*.db
+prisma/*.db-journal
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
