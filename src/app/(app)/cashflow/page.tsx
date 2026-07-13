@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { Badge, Card, EmptyState, PageHeader, Table, TBody, Td, Th, THead } from "@/components/ui";
-import { formatDate, formatMoney } from "@/lib/format";
+import { Card, PageHeader } from "@/components/ui";
+import { formatMoney } from "@/lib/format";
 import { CreateTransactionForm } from "./create-transaction-form";
+import { CashFlowTable, type CashFlowRow } from "./cashflow-table";
 
 export default async function CashFlowPage() {
   const session = await auth();
@@ -21,15 +21,18 @@ export default async function CashFlowPage() {
     },
   });
 
-  const withBalance = transactions.reduce<(typeof transactions[number] & { balance: number })[]>(
-    (acc, t) => {
-      const prevBalance = acc.length > 0 ? acc[acc.length - 1].balance : 0;
-      const balance = prevBalance + (t.type === "INCOME" ? t.amount : -t.amount);
-      acc.push({ ...t, balance });
-      return acc;
-    },
-    []
-  );
+  const withBalance = transactions.reduce<CashFlowRow[]>((acc, t) => {
+    const prevBalance = acc.length > 0 ? acc[acc.length - 1].balance : 0;
+    const balance = prevBalance + (t.type === "INCOME" ? t.amount : -t.amount);
+    const details =
+      t.description ??
+      (t.invoice && `Invoice ${t.invoice.invoiceNumber} — ${t.invoice.customer.name}`) ??
+      (t.purchase && `${t.purchase.quantity} ${t.purchase.item.unit} of ${t.purchase.item.name}`) ??
+      (t.healthRecord && `Health record for flock "${t.healthRecord.flock.name}"`) ??
+      "—";
+    acc.push({ id: t.id, date: t.date, type: t.type, category: t.category, details, amount: t.amount, balance });
+    return acc;
+  }, []);
 
   const totalIncome = transactions.filter((t) => t.type === "INCOME").reduce((s, t) => s + t.amount, 0);
   const totalExpense = transactions.filter((t) => t.type === "EXPENSE").reduce((s, t) => s + t.amount, 0);
@@ -68,49 +71,7 @@ export default async function CashFlowPage() {
         <CreateTransactionForm />
       </Card>
 
-      {display.length === 0 ? (
-        <EmptyState>No cash flow activity yet.</EmptyState>
-      ) : (
-        <Table>
-          <THead>
-            <Th>Date</Th>
-            <Th>Type</Th>
-            <Th>Category</Th>
-            <Th>Details</Th>
-            <Th>Amount</Th>
-            <Th>Balance</Th>
-            <Th></Th>
-          </THead>
-          <TBody>
-            {display.map((t) => (
-              <tr key={t.id}>
-                <Td className="whitespace-nowrap">{formatDate(t.date)}</Td>
-                <Td>
-                  <Badge tone={t.type === "INCOME" ? "green" : "red"}>{t.type}</Badge>
-                </Td>
-                <Td>{t.category}</Td>
-                <Td>
-                  {t.description ??
-                    (t.invoice && `Invoice ${t.invoice.invoiceNumber} — ${t.invoice.customer.name}`) ??
-                    (t.purchase && `${t.purchase.quantity} ${t.purchase.item.unit} of ${t.purchase.item.name}`) ??
-                    (t.healthRecord && `Health record for flock "${t.healthRecord.flock.name}"`) ??
-                    "—"}
-                </Td>
-                <Td className={t.type === "INCOME" ? "text-emerald-600" : "text-red-600"}>
-                  {t.type === "INCOME" ? "+" : "-"}
-                  {formatMoney(t.amount)}
-                </Td>
-                <Td className="font-medium">{formatMoney(t.balance)}</Td>
-                <Td>
-                  <Link href={`/cashflow/${t.id}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
-                    Edit
-                  </Link>
-                </Td>
-              </tr>
-            ))}
-          </TBody>
-        </Table>
-      )}
+      <CashFlowTable rows={display} />
     </div>
   );
 }

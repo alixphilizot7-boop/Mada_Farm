@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { Badge, Button, Card, PageHeader, Table, TBody, Td, Th, THead } from "@/components/ui";
+import { Badge, Card, PageHeader, Table, TBody, Td, Th, THead } from "@/components/ui";
 import { formatDate } from "@/lib/format";
 import { CreateUserForm } from "./create-user-form";
 import { ResetPasswordForm } from "./reset-password-form";
 import { EditUserForm } from "./edit-user-form";
-import { toggleUserActiveAction } from "./actions";
+import { ToggleActiveButton } from "./toggle-active-button";
 
 export default async function UsersPage() {
   const session = await auth();
@@ -52,11 +52,7 @@ export default async function UsersPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <EditUserForm user={user} isSelf={user.id === session.user.id} />
                   <ResetPasswordForm userId={user.id} />
-                  <form action={toggleUserActiveAction.bind(null, user.id)}>
-                    <Button type="submit" variant={user.active ? "danger" : "secondary"}>
-                      {user.active ? "Deactivate" : "Activate"}
-                    </Button>
-                  </form>
+                  <ToggleActiveButton userId={user.id} active={user.active} name={user.name} />
                 </div>
               </Td>
             </tr>

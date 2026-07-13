@@ -35,3 +35,22 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+td,
+th {
+  font-variant-numeric: tabular-nums;
+}
+
+tbody tr {
+  transition: background-color 120ms ease;
+}
+
+tbody tr:hover {
+  background-color: rgba(146, 118, 66, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  tbody tr:hover {
+    background-color: rgba(210, 180, 120, 0.07);
+  }
+}
