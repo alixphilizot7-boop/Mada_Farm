@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
+import { I18nProvider } from "@/components/i18n-provider";
+import { getDictionary } from "@/lib/i18n/locale";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,17 +25,23 @@ export const metadata: Metadata = {
   description: "Mada Farm operations dashboard",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { locale, t } = await getDictionary();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <I18nProvider locale={locale} t={t}>
+          {children}
+        </I18nProvider>
+      </body>
     </html>
   );
 }

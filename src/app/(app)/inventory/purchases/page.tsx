@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Card, EmptyState, PageHeader, Table, TBody, Td, Th, THead } from "@/components/ui";
 import { formatDate, formatMoney } from "@/lib/format";
+import { getDictionary } from "@/lib/i18n/locale";
 import { CreatePurchaseForm } from "./create-purchase-form";
 
 export default async function PurchasesPage() {
@@ -13,51 +14,53 @@ export default async function PurchasesPage() {
       include: { item: true, recordedBy: true },
     }),
   ]);
+  const { t } = await getDictionary();
+  const p = t.inventory.purchasesPage;
 
   return (
     <div>
-      <PageHeader title="Purchases" description="Feed, water and supplies bought for the flocks." />
+      <PageHeader title={p.title} description={p.description} />
 
       <Card className="mb-6">
         <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
-          Record a purchase
+          {p.recordPurchase}
         </h2>
         {items.length === 0 ? (
-          <EmptyState>Add an inventory item first on the Feed & Water page.</EmptyState>
+          <EmptyState>{p.needItemFirst}</EmptyState>
         ) : (
           <CreatePurchaseForm items={items} />
         )}
       </Card>
 
       {purchases.length === 0 ? (
-        <EmptyState>No purchases recorded yet.</EmptyState>
+        <EmptyState>{p.emptyState}</EmptyState>
       ) : (
         <Table>
           <THead>
-            <Th>Date</Th>
-            <Th>Item</Th>
-            <Th>Quantity</Th>
-            <Th>Unit cost</Th>
-            <Th>Total</Th>
-            <Th>Supplier</Th>
-            <Th>Recorded by</Th>
+            <Th>{t.common.date}</Th>
+            <Th>{t.inventory.item}</Th>
+            <Th>{t.common.quantity}</Th>
+            <Th>{p.unitCost}</Th>
+            <Th>{t.common.total}</Th>
+            <Th>{t.common.supplier}</Th>
+            <Th>{t.common.recordedBy}</Th>
             <Th></Th>
           </THead>
           <TBody>
-            {purchases.map((p) => (
-              <tr key={p.id}>
-                <Td className="whitespace-nowrap">{formatDate(p.date)}</Td>
-                <Td>{p.item.name}</Td>
+            {purchases.map((pu) => (
+              <tr key={pu.id}>
+                <Td className="whitespace-nowrap">{formatDate(pu.date)}</Td>
+                <Td>{pu.item.name}</Td>
                 <Td>
-                  {p.quantity} {p.item.unit}
+                  {pu.quantity} {pu.item.unit}
                 </Td>
-                <Td>{formatMoney(p.unitCost)}</Td>
-                <Td>{formatMoney(p.totalCost)}</Td>
-                <Td>{p.supplier ?? "—"}</Td>
-                <Td>{p.recordedBy.name}</Td>
+                <Td>{formatMoney(pu.unitCost)}</Td>
+                <Td>{formatMoney(pu.totalCost)}</Td>
+                <Td>{pu.supplier ?? t.common.none}</Td>
+                <Td>{pu.recordedBy.name}</Td>
                 <Td>
-                  <Link href={`/inventory/purchases/${p.id}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
-                    Edit
+                  <Link href={`/inventory/purchases/${pu.id}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
+                    {t.common.edit}
                   </Link>
                 </Td>
               </tr>

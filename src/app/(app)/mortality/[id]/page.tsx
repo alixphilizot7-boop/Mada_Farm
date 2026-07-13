@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Card, PageHeader } from "@/components/ui";
+import { getDictionary } from "@/lib/i18n/locale";
 import { EditMortalityForm } from "./edit-mortality-form";
 
 export default async function EditMortalityPage({
@@ -10,6 +11,7 @@ export default async function EditMortalityPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const { t } = await getDictionary();
 
   const [log, flocks] = await Promise.all([
     prisma.mortalityLog.findUnique({ where: { id } }),
@@ -19,13 +21,13 @@ export default async function EditMortalityPage({
 
   return (
     <div>
-      <PageHeader title="Edit Mortality Record" />
+      <PageHeader title={t.mortality.editTitle} />
       <Card>
         {log.healthRecordId ? (
           <p className="text-sm text-stone-600 dark:text-stone-300">
-            This loss was auto-logged from a health record.{" "}
+            {t.mortality.autoLoggedFrom}{" "}
             <Link href={`/health/${log.healthRecordId}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
-              Edit the health record instead
+              {t.mortality.editHealthInstead}
             </Link>
             .
           </p>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Card, EmptyState, PageHeader, Table, TBody, Td, Th, THead } from "@/components/ui";
 import { formatDate } from "@/lib/format";
+import { getDictionary } from "@/lib/i18n/locale";
 import { CreateUsageForm } from "./create-usage-form";
 
 export default async function UsagePage() {
@@ -14,49 +15,51 @@ export default async function UsagePage() {
       include: { item: true, flock: true, recordedBy: true },
     }),
   ]);
+  const { t } = await getDictionary();
+  const u = t.inventory.usagePage;
 
   return (
     <div>
-      <PageHeader title="Usage" description="Feed and water given to the chickens." />
+      <PageHeader title={u.title} description={u.description} />
 
       <Card className="mb-6">
         <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
-          Log feed/water given
+          {u.logGiven}
         </h2>
         {items.length === 0 ? (
-          <EmptyState>Add an inventory item first on the Feed & Water page.</EmptyState>
+          <EmptyState>{u.needItemFirst}</EmptyState>
         ) : (
           <CreateUsageForm items={items} flocks={flocks} />
         )}
       </Card>
 
       {usages.length === 0 ? (
-        <EmptyState>No usage recorded yet.</EmptyState>
+        <EmptyState>{u.emptyState}</EmptyState>
       ) : (
         <Table>
           <THead>
-            <Th>Date</Th>
-            <Th>Item</Th>
-            <Th>Flock</Th>
-            <Th>Quantity</Th>
-            <Th>Notes</Th>
-            <Th>Recorded by</Th>
+            <Th>{t.common.date}</Th>
+            <Th>{t.inventory.item}</Th>
+            <Th>{u.flock}</Th>
+            <Th>{t.common.quantity}</Th>
+            <Th>{t.common.notes}</Th>
+            <Th>{t.common.recordedBy}</Th>
             <Th></Th>
           </THead>
           <TBody>
-            {usages.map((u) => (
-              <tr key={u.id}>
-                <Td className="whitespace-nowrap">{formatDate(u.date)}</Td>
-                <Td>{u.item.name}</Td>
-                <Td>{u.flock?.name ?? "Whole farm"}</Td>
+            {usages.map((us) => (
+              <tr key={us.id}>
+                <Td className="whitespace-nowrap">{formatDate(us.date)}</Td>
+                <Td>{us.item.name}</Td>
+                <Td>{us.flock?.name ?? u.wholeFarm}</Td>
                 <Td>
-                  {u.quantity} {u.item.unit}
+                  {us.quantity} {us.item.unit}
                 </Td>
-                <Td>{u.notes ?? "—"}</Td>
-                <Td>{u.recordedBy.name}</Td>
+                <Td>{us.notes ?? t.common.none}</Td>
+                <Td>{us.recordedBy.name}</Td>
                 <Td>
-                  <Link href={`/inventory/usage/${u.id}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
-                    Edit
+                  <Link href={`/inventory/usage/${us.id}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
+                    {t.common.edit}
                   </Link>
                 </Td>
               </tr>

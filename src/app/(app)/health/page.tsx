@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Badge, Card, EmptyState, PageHeader, Table, TBody, Td, Th, THead } from "@/components/ui";
 import { formatDate, formatMoney } from "@/lib/format";
+import { getDictionary } from "@/lib/i18n/locale";
 import { CreateHealthRecordForm } from "./create-health-record-form";
 
 const OUTCOME_TONE = {
@@ -19,34 +20,35 @@ export default async function HealthPage() {
       include: { flock: true },
     }),
   ]);
+  const { t } = await getDictionary();
 
   return (
     <div>
-      <PageHeader title="Health" description="Illness, treatment, vaccination and checkup records." />
+      <PageHeader title={t.health.title} description={t.health.description} />
 
       <Card className="mb-6">
         <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
-          Log a health event
+          {t.health.logEvent}
         </h2>
         {flocks.length === 0 ? (
-          <EmptyState>Create a flock first before logging health records.</EmptyState>
+          <EmptyState>{t.health.needFlockFirst}</EmptyState>
         ) : (
           <CreateHealthRecordForm flocks={flocks} />
         )}
       </Card>
 
       {records.length === 0 ? (
-        <EmptyState>No health records yet.</EmptyState>
+        <EmptyState>{t.health.emptyState}</EmptyState>
       ) : (
         <Table>
           <THead>
-            <Th>Date</Th>
-            <Th>Flock</Th>
-            <Th>Type</Th>
-            <Th>Affected</Th>
-            <Th>Diagnosis / Treatment</Th>
-            <Th>Cost</Th>
-            <Th>Outcome</Th>
+            <Th>{t.common.date}</Th>
+            <Th>{t.health.flock}</Th>
+            <Th>{t.health.type}</Th>
+            <Th>{t.health.affected}</Th>
+            <Th>{t.health.diagnosisTreatment}</Th>
+            <Th>{t.health.cost}</Th>
+            <Th>{t.health.outcome}</Th>
             <Th></Th>
           </THead>
           <TBody>
@@ -54,16 +56,16 @@ export default async function HealthPage() {
               <tr key={r.id}>
                 <Td className="whitespace-nowrap">{formatDate(r.date)}</Td>
                 <Td>{r.flock.name}</Td>
-                <Td>{r.type}</Td>
+                <Td>{t.health.types[r.type]}</Td>
                 <Td>{r.affectedCount}</Td>
-                <Td>{[r.diagnosis, r.treatment].filter(Boolean).join(" — ") || "—"}</Td>
-                <Td>{r.cost > 0 ? formatMoney(r.cost) : "—"}</Td>
+                <Td>{[r.diagnosis, r.treatment].filter(Boolean).join(" — ") || t.common.none}</Td>
+                <Td>{r.cost > 0 ? formatMoney(r.cost) : t.common.none}</Td>
                 <Td>
-                  <Badge tone={OUTCOME_TONE[r.outcome]}>{r.outcome}</Badge>
+                  <Badge tone={OUTCOME_TONE[r.outcome]}>{t.health.outcomes[r.outcome]}</Badge>
                 </Td>
                 <Td>
                   <Link href={`/health/${r.id}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
-                    Edit
+                    {t.common.edit}
                   </Link>
                 </Td>
               </tr>

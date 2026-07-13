@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Badge, Card, EmptyState, PageHeader, Table, TBody, Td, Th, THead } from "@/components/ui";
 import { formatDate } from "@/lib/format";
+import { getDictionary } from "@/lib/i18n/locale";
 import { EditItemForm } from "./edit-item-form";
 import { AdjustStockForm } from "./adjust-stock-form";
 
@@ -20,6 +21,8 @@ export default async function InventoryItemPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const { t } = await getDictionary();
+  const d = t.inventory.detail;
 
   const item = await prisma.inventoryItem.findUnique({ where: { id } });
   if (!item) notFound();
@@ -46,8 +49,8 @@ export default async function InventoryItemPage({
       quantity: m.delta,
       detail:
         m.kind === "Purchase"
-          ? `Purchased by ${m.recordedBy}${m.extra ? ` from ${m.extra}` : ""}`
-          : `Used by ${m.recordedBy}${m.extra ? ` for flock "${m.extra}"` : " (whole farm)"}`,
+          ? `${d.purchasedBy} ${m.recordedBy}${m.extra ? ` ${d.from} ${m.extra}` : ""}`
+          : `${d.usedBy} ${m.recordedBy}${m.extra ? ` ${d.forFlock} "${m.extra}"` : ` ${d.wholeFarm}`}`,
       href: m.kind === "Purchase" ? `/inventory/purchases/${m.id}` : `/inventory/usage/${m.id}`,
       balance: prevBalance + m.delta,
     });
@@ -61,55 +64,52 @@ export default async function InventoryItemPage({
     <div>
       <PageHeader
         title={item.name}
-        description={`${item.type} · tracked in ${item.unit}`}
+        description={`${t.inventory.types[item.type]} · ${d.trackedIn} ${item.unit}`}
       />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Card>
-          <p className="text-xs text-stone-500 dark:text-stone-400">Current stock</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{d.currentStock}</p>
           <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">
             {item.currentStock} {item.unit}
           </p>
         </Card>
         <Card>
-          <p className="text-xs text-stone-500 dark:text-stone-400">Low stock alert level</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{d.alertLevel}</p>
           <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">
             {item.reorderLevel} {item.unit}
           </p>
         </Card>
         <Card>
-          <p className="text-xs text-stone-500 dark:text-stone-400">Status</p>
-          {isLowStock ? <Badge tone="amber">Low stock</Badge> : <Badge tone="green">OK</Badge>}
+          <p className="text-xs text-stone-500 dark:text-stone-400">{d.status}</p>
+          {isLowStock ? <Badge tone="amber">{t.inventory.lowStock}</Badge> : <Badge tone="green">{t.inventory.ok}</Badge>}
         </Card>
       </div>
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">Edit item</h2>
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">{d.editItem}</h2>
         <EditItemForm item={item} />
       </Card>
 
       <Card className="mb-6">
         <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
-          Correct stock level
+          {d.correctStock}
         </h2>
-        <p className="mb-4 text-xs text-stone-500 dark:text-stone-400">
-          Use this if a physical count doesn&apos;t match the system (spillage, spoilage, counting
-          error) — it will be recorded in the audit log.
-        </p>
+        <p className="mb-4 text-xs text-stone-500 dark:text-stone-400">{d.correctStockHint}</p>
         <AdjustStockForm item={item} />
       </Card>
 
-      <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">Stock ledger</h2>
+      <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">{d.stockLedger}</h2>
       {display.length === 0 ? (
-        <EmptyState>No purchases or usage recorded for this item yet.</EmptyState>
+        <EmptyState>{d.emptyLedger}</EmptyState>
       ) : (
         <Table>
           <THead>
-            <Th>Date</Th>
-            <Th>Type</Th>
-            <Th>Change</Th>
-            <Th>Balance</Th>
-            <Th>Details</Th>
+            <Th>{t.common.date}</Th>
+            <Th>{t.inventory.type}</Th>
+            <Th>{d.change}</Th>
+            <Th>{d.balance}</Th>
+            <Th>{d.details}</Th>
             <Th></Th>
           </THead>
           <TBody>
@@ -129,7 +129,7 @@ export default async function InventoryItemPage({
                 <Td>{entry.detail}</Td>
                 <Td>
                   <Link href={entry.href} className="text-emerald-700 hover:underline dark:text-emerald-400">
-                    Edit
+                    {t.common.edit}
                   </Link>
                 </Td>
               </tr>

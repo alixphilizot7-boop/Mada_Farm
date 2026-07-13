@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Card, EmptyState, PageHeader, Table, TBody, Td, Th, THead } from "@/components/ui";
 import { formatDate } from "@/lib/format";
+import { getDictionary } from "@/lib/i18n/locale";
 import { CreateEggLogForm } from "./create-egg-log-form";
 
 export default async function EggsPage() {
@@ -13,50 +14,48 @@ export default async function EggsPage() {
       include: { flock: true, recordedBy: true },
     }),
   ]);
+  const { t } = await getDictionary();
 
   const totalWhole = logs.reduce((s, l) => s + l.wholeCount, 0);
   const totalBroken = logs.reduce((s, l) => s + l.brokenCount, 0);
 
   return (
     <div>
-      <PageHeader
-        title="Egg Production"
-        description="Daily egg yield per flock."
-      />
+      <PageHeader title={t.eggs.title} description={t.eggs.description} />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2">
         <Card>
-          <p className="text-xs text-stone-500 dark:text-stone-400">Whole eggs (last 100 entries)</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{t.eggs.wholeEggsRecent}</p>
           <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">{totalWhole}</p>
         </Card>
         <Card>
-          <p className="text-xs text-stone-500 dark:text-stone-400">Broken eggs (last 100 entries)</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{t.eggs.brokenEggsRecent}</p>
           <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">{totalBroken}</p>
         </Card>
       </div>
 
       <Card className="mb-6">
         <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
-          Log today&apos;s collection
+          {t.eggs.logToday}
         </h2>
         {flocks.length === 0 ? (
-          <EmptyState>Create a flock first before logging eggs.</EmptyState>
+          <EmptyState>{t.eggs.needFlockFirst}</EmptyState>
         ) : (
           <CreateEggLogForm flocks={flocks} />
         )}
       </Card>
 
       {logs.length === 0 ? (
-        <EmptyState>No egg logs yet.</EmptyState>
+        <EmptyState>{t.eggs.emptyState}</EmptyState>
       ) : (
         <Table>
           <THead>
-            <Th>Date</Th>
-            <Th>Flock</Th>
-            <Th>Whole</Th>
-            <Th>Broken</Th>
-            <Th>Notes</Th>
-            <Th>Logged by</Th>
+            <Th>{t.common.date}</Th>
+            <Th>{t.eggs.flock}</Th>
+            <Th>{t.eggs.whole}</Th>
+            <Th>{t.eggs.broken}</Th>
+            <Th>{t.common.notes}</Th>
+            <Th>{t.eggs.loggedBy}</Th>
             <Th></Th>
           </THead>
           <TBody>
@@ -66,11 +65,11 @@ export default async function EggsPage() {
                 <Td>{log.flock.name}</Td>
                 <Td>{log.wholeCount}</Td>
                 <Td>{log.brokenCount}</Td>
-                <Td>{log.notes ?? "—"}</Td>
+                <Td>{log.notes ?? t.common.none}</Td>
                 <Td>{log.recordedBy.name}</Td>
                 <Td>
                   <Link href={`/eggs/${log.id}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
-                    Edit
+                    {t.common.edit}
                   </Link>
                 </Td>
               </tr>

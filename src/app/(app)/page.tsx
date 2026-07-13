@@ -7,6 +7,7 @@ import { EggTrendChart } from "@/components/charts/egg-trend-chart";
 import { CashFlowChart } from "@/components/charts/cash-flow-chart";
 import { ChickProductionChart } from "@/components/charts/chick-production-chart";
 import { computeVaccinationAlerts } from "@/lib/vaccination-schedule";
+import { getDictionary } from "@/lib/i18n/locale";
 
 function startOfDay(d: Date) {
   const copy = new Date(d);
@@ -16,6 +17,8 @@ function startOfDay(d: Date) {
 
 export default async function DashboardPage() {
   const session = await auth();
+  const { locale, t } = await getDictionary();
+  const dateLocale = locale === "fr" ? "fr-FR" : "en-US";
   const isAdmin = session?.user.role === "ADMIN";
   const now = new Date();
 
@@ -66,7 +69,7 @@ export default async function DashboardPage() {
     if (idx >= 0 && idx < 14) eggDays[idx].eggs += log.wholeCount;
   }
   const eggChartData = eggDays.map((d) => ({
-    label: d.date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    label: d.date.toLocaleDateString(dateLocale, { month: "short", day: "numeric" }),
     eggs: d.eggs,
   }));
   const eggsToday = eggDays[13].eggs;
@@ -83,7 +86,7 @@ export default async function DashboardPage() {
     if (idx >= 0 && idx < 6) chickMonths[idx].chicks += hatch.chicksHatched;
   }
   const chickChartData = chickMonths.map((m) => ({
-    label: m.monthDate.toLocaleDateString("en-US", { month: "short", year: "2-digit" }),
+    label: m.monthDate.toLocaleDateString(dateLocale, { month: "short", year: "2-digit" }),
     chicks: m.chicks,
   }));
 
@@ -102,7 +105,7 @@ export default async function DashboardPage() {
     }
   }
   const cashChartData = cashWeeks.map((w) => ({
-    label: w.weekStart.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    label: w.weekStart.toLocaleDateString(dateLocale, { month: "short", day: "numeric" }),
     income: w.income,
     expense: w.expense,
   }));
@@ -115,35 +118,35 @@ export default async function DashboardPage() {
   return (
     <div>
       <PageHeader
-        title={`Welcome, ${session?.user?.name ?? ""}`}
-        description="Here's what's happening on the farm."
+        title={`${t.dashboard.welcome}, ${session?.user?.name ?? ""}`}
+        description={t.dashboard.subtitle}
       />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={Bird}
-          label="Active flocks"
+          label={t.dashboard.activeFlocks}
           value={
             <>
-              {flocks.length} <span className="text-sm font-normal text-stone-400">· {totalBirds} birds</span>
+              {flocks.length} <span className="text-sm font-normal text-stone-400">· {totalBirds} {t.dashboard.birds}</span>
             </>
           }
         />
         <StatCard
           icon={Egg}
           tone="amber"
-          label="Eggs today / this week"
+          label={t.dashboard.eggsTodayWeek}
           value={
             <>
               {eggsToday} <span className="text-sm font-normal text-stone-400">/ {eggsThisWeek}</span>
             </>
           }
         />
-        <StatCard icon={HeartCrack} tone="red" label="Lost this month" value={mortalityThisMonth} />
+        <StatCard icon={HeartCrack} tone="red" label={t.dashboard.lostThisMonth} value={mortalityThisMonth} />
         <StatCard
           icon={PackageSearch}
           tone={lowStockItems.length > 0 ? "amber" : "stone"}
-          label="Low stock items"
+          label={t.dashboard.lowStockItems}
           value={lowStockItems.length}
           hint={
             lowStockItems.length > 0 && (
@@ -158,16 +161,16 @@ export default async function DashboardPage() {
       {vaccinationAlerts.length > 0 && (
         <Card className="mb-6 border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
           <p className="mb-2 text-sm font-medium text-amber-800 dark:text-amber-300">
-            Vaccination &amp; biosecurity due
+            {t.dashboard.vaccinationDue}
           </p>
           <ul className="space-y-1 text-sm text-amber-800 dark:text-amber-300">
             {vaccinationAlerts.slice(0, 8).map((a, i) => (
               <li key={i}>
                 <span className="font-medium">{a.flockName}</span> — {a.rule.name}{" "}
                 {a.overdue ? (
-                  <span className="font-semibold">overdue since {formatDate(a.dueDate)}</span>
+                  <span className="font-semibold">{t.dashboard.overdueSince} {formatDate(a.dueDate)}</span>
                 ) : (
-                  <span>due {formatDate(a.dueDate)}</span>
+                  <span>{t.dashboard.due} {formatDate(a.dueDate)}</span>
                 )}
               </li>
             ))}
@@ -177,10 +180,10 @@ export default async function DashboardPage() {
 
       {isAdmin && (
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          <StatCard icon={Wallet} tone="emerald" label="Net cash balance" value={formatMoney(totalIncome - totalExpense)} />
-          <StatCard icon={Receipt} tone="blue" label="Outstanding invoices" value={formatMoney(outstanding)} />
+          <StatCard icon={Wallet} tone="emerald" label={t.dashboard.netCashBalance} value={formatMoney(totalIncome - totalExpense)} />
+          <StatCard icon={Receipt} tone="blue" label={t.dashboard.outstandingInvoices} value={formatMoney(outstanding)} />
           <Card className="flex flex-col justify-center gap-2">
-            <LinkButton href="/invoices/new">New invoice</LinkButton>
+            <LinkButton href="/invoices/new">{t.dashboard.newInvoice}</LinkButton>
           </Card>
         </div>
       )}
@@ -188,14 +191,14 @@ export default async function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">
-            Egg production — last 14 days
+            {t.dashboard.eggProduction14}
           </h2>
           <EggTrendChart data={eggChartData} />
         </Card>
 
         <Card>
           <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">
-            Chick production — last 6 months
+            {t.dashboard.chickProduction6}
           </h2>
           <ChickProductionChart data={chickChartData} />
         </Card>
@@ -203,13 +206,13 @@ export default async function DashboardPage() {
         {isAdmin ? (
           <Card>
             <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">
-              Cash flow — last 8 weeks
+              {t.dashboard.cashFlow8}
             </h2>
             <CashFlowChart data={cashChartData} />
           </Card>
         ) : (
           <Card>
-            <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">Flocks</h2>
+            <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">{t.dashboard.flocksTitle}</h2>
             <div className="flex flex-wrap gap-2">
               {flocks.map((f) => (
                 <Badge key={f.id} tone="green">
