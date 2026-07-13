@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/ui";
+import { getDictionary } from "@/lib/i18n/locale";
 import { InvoiceForm } from "../../new/invoice-form";
 
 export default async function EditInvoicePage({
@@ -11,6 +12,7 @@ export default async function EditInvoicePage({
 }) {
   const session = await auth();
   if (session?.user.role !== "ADMIN") redirect("/");
+  const { t } = await getDictionary();
 
   const { id } = await params;
   const [invoice, customers] = await Promise.all([
@@ -21,7 +23,7 @@ export default async function EditInvoicePage({
 
   return (
     <div>
-      <PageHeader title={`Edit ${invoice.invoiceNumber}`} />
+      <PageHeader title={`${t.invoices.edit} ${invoice.invoiceNumber}`} />
       <InvoiceForm customers={customers} invoice={invoice} />
     </div>
   );

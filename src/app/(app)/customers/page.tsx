@@ -3,11 +3,13 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, EmptyState, PageHeader, Table, TBody, Td, Th, THead } from "@/components/ui";
+import { getDictionary } from "@/lib/i18n/locale";
 import { CreateCustomerForm } from "./create-customer-form";
 
 export default async function CustomersPage() {
   const session = await auth();
   if (session?.user.role !== "ADMIN") redirect("/");
+  const { t } = await getDictionary();
 
   const customers = await prisma.customer.findMany({
     orderBy: { name: "asc" },
@@ -16,25 +18,25 @@ export default async function CustomersPage() {
 
   return (
     <div>
-      <PageHeader title="Customers" description="People and businesses you sell eggs, chicks or chicken to." />
+      <PageHeader title={t.customers.title} description={t.customers.description} />
 
       <Card className="mb-6">
         <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">
-          Add a customer
+          {t.customers.addCustomer}
         </h2>
         <CreateCustomerForm />
       </Card>
 
       {customers.length === 0 ? (
-        <EmptyState>No customers yet.</EmptyState>
+        <EmptyState>{t.customers.emptyState}</EmptyState>
       ) : (
         <Table>
           <THead>
-            <Th>Name</Th>
-            <Th>Phone</Th>
-            <Th>Email</Th>
-            <Th>Address</Th>
-            <Th>Invoices</Th>
+            <Th>{t.customers.name}</Th>
+            <Th>{t.customers.phone}</Th>
+            <Th>{t.customers.email}</Th>
+            <Th>{t.customers.address}</Th>
+            <Th>{t.customers.invoices}</Th>
           </THead>
           <TBody>
             {customers.map((c) => (
@@ -44,9 +46,9 @@ export default async function CustomersPage() {
                     {c.name}
                   </Link>
                 </Td>
-                <Td>{c.phone ?? "—"}</Td>
-                <Td>{c.email ?? "—"}</Td>
-                <Td>{c.address ?? "—"}</Td>
+                <Td>{c.phone ?? t.common.none}</Td>
+                <Td>{c.email ?? t.common.none}</Td>
+                <Td>{c.address ?? t.common.none}</Td>
                 <Td>{c._count.invoices}</Td>
               </tr>
             ))}

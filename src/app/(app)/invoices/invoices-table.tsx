@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Badge, EmptyState, Table, TBody, Td, Th, THead } from "@/components/ui";
 import { SearchInput } from "@/components/search-input";
 import { formatDate, formatMoney } from "@/lib/format";
+import { useI18n } from "@/components/i18n-provider";
 import type { Invoice, Customer, InvoiceStatus } from "@prisma/client";
 
 const STATUS_TONE: Record<InvoiceStatus, "zinc" | "blue" | "green" | "amber" | "red"> = {
@@ -19,6 +20,7 @@ type InvoiceRow = Invoice & { customer: Customer };
 
 export function InvoicesTable({ invoices }: { invoices: InvoiceRow[] }) {
   const [query, setQuery] = useState("");
+  const { t } = useI18n();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -34,21 +36,21 @@ export function InvoicesTable({ invoices }: { invoices: InvoiceRow[] }) {
   return (
     <div>
       <div className="mb-4 max-w-xs">
-        <SearchInput value={query} onChange={setQuery} placeholder="Search invoice # or customer..." />
+        <SearchInput value={query} onChange={setQuery} placeholder={t.invoices.searchPlaceholder} />
       </div>
 
       {filtered.length === 0 ? (
         <EmptyState>
-          {invoices.length === 0 ? "No invoices yet. Create your first one." : "No invoices match your search."}
+          {invoices.length === 0 ? t.invoices.emptyState : t.invoices.emptySearch}
         </EmptyState>
       ) : (
         <Table>
           <THead>
-            <Th>Invoice #</Th>
-            <Th>Customer</Th>
-            <Th>Issue date</Th>
-            <Th>Total</Th>
-            <Th>Status</Th>
+            <Th>{t.invoices.invoiceNumber}</Th>
+            <Th>{t.invoices.customer}</Th>
+            <Th>{t.invoices.issueDate}</Th>
+            <Th>{t.common.total}</Th>
+            <Th>{t.common.status}</Th>
           </THead>
           <TBody>
             {filtered.map((inv) => (
@@ -65,7 +67,7 @@ export function InvoicesTable({ invoices }: { invoices: InvoiceRow[] }) {
                 <Td className="whitespace-nowrap">{formatDate(inv.issueDate)}</Td>
                 <Td>{formatMoney(inv.total)}</Td>
                 <Td>
-                  <Badge tone={STATUS_TONE[inv.status]}>{inv.status}</Badge>
+                  <Badge tone={STATUS_TONE[inv.status]}>{t.invoiceStatus[inv.status]}</Badge>
                 </Td>
               </tr>
             ))}

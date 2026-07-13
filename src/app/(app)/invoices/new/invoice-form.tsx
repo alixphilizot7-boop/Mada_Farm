@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { createInvoiceAction, updateInvoiceAction } from "../actions";
 import { Button, Card, Field, inputClass } from "@/components/ui";
 import { formatMoney, toDateInputValue } from "@/lib/format";
+import { useI18n } from "@/components/i18n-provider";
 import type { Customer, Invoice, InvoiceItem } from "@prisma/client";
 
 type Row = {
@@ -42,6 +43,8 @@ export function InvoiceForm({
   const [taxRate, setTaxRate] = useState(() =>
     invoice && invoice.subtotal > 0 ? String((invoice.tax / invoice.subtotal) * 100) : "0"
   );
+  const { t } = useI18n();
+  const f = t.invoices.form;
 
   function updateRow(key: number, patch: Partial<Row>) {
     setRows((prev) => prev.map((r) => (r.key === key ? { ...r, ...patch } : r)));
@@ -56,9 +59,9 @@ export function InvoiceForm({
       {invoice && <input type="hidden" name="id" value={invoice.id} />}
       <Card>
         <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="Customer">
+          <Field label={f.customer}>
             <select name="customerId" required defaultValue={invoice?.customerId ?? ""} className={inputClass}>
-              <option value="">Select customer</option>
+              <option value="">{f.selectCustomer}</option>
               {customers.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -66,7 +69,7 @@ export function InvoiceForm({
               ))}
             </select>
           </Field>
-          <Field label="Issue date">
+          <Field label={f.issueDate}>
             <input
               name="issueDate"
               type="date"
@@ -75,7 +78,7 @@ export function InvoiceForm({
               className={inputClass}
             />
           </Field>
-          <Field label="Due date">
+          <Field label={f.dueDate}>
             <input
               name="dueDate"
               type="date"
@@ -88,9 +91,9 @@ export function InvoiceForm({
 
       <Card>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-stone-700 dark:text-stone-200">Line items</h2>
+          <h2 className="text-sm font-semibold text-stone-700 dark:text-stone-200">{f.lineItems}</h2>
           <Button type="button" variant="secondary" onClick={() => setRows((prev) => [...prev, emptyRow()])}>
-            Add line
+            {f.addLine}
           </Button>
         </div>
 
@@ -98,22 +101,22 @@ export function InvoiceForm({
           {rows.map((row) => (
             <div key={row.key} className="grid gap-2 sm:grid-cols-12 sm:items-end">
               <div className="sm:col-span-2">
-                <Field label="Product">
+                <Field label={f.product}>
                   <select
                     name="productType"
                     value={row.productType}
                     onChange={(e) => updateRow(row.key, { productType: e.target.value as Row["productType"] })}
                     className={inputClass}
                   >
-                    <option value="EGGS">Eggs</option>
-                    <option value="CHICKS">Chicks</option>
-                    <option value="CHICKEN">Chicken</option>
-                    <option value="OTHER">Other</option>
+                    <option value="EGGS">{t.productType.EGGS}</option>
+                    <option value="CHICKS">{t.productType.CHICKS}</option>
+                    <option value="CHICKEN">{t.productType.CHICKEN}</option>
+                    <option value="OTHER">{t.productType.OTHER}</option>
                   </select>
                 </Field>
               </div>
               <div className="sm:col-span-4">
-                <Field label="Description">
+                <Field label={f.description}>
                   <input
                     name="description"
                     required
@@ -124,7 +127,7 @@ export function InvoiceForm({
                 </Field>
               </div>
               <div className="sm:col-span-2">
-                <Field label="Quantity">
+                <Field label={f.quantity}>
                   <input
                     name="quantity"
                     type="number"
@@ -138,7 +141,7 @@ export function InvoiceForm({
                 </Field>
               </div>
               <div className="sm:col-span-2">
-                <Field label="Unit price">
+                <Field label={f.unitPrice}>
                   <input
                     name="unitPrice"
                     type="number"
@@ -161,7 +164,7 @@ export function InvoiceForm({
                     variant="ghost"
                     onClick={() => setRows((prev) => prev.filter((r) => r.key !== row.key))}
                   >
-                    Remove
+                    {f.remove}
                   </Button>
                 )}
               </div>
@@ -172,7 +175,7 @@ export function InvoiceForm({
 
       <Card>
         <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="Tax rate (%)">
+          <Field label={f.taxRate}>
             <input
               name="taxRate"
               type="number"
@@ -184,22 +187,22 @@ export function InvoiceForm({
             />
           </Field>
           <div className="sm:col-span-2">
-            <Field label="Notes">
+            <Field label={f.notes}>
               <input name="notes" defaultValue={invoice?.notes ?? ""} className={inputClass} />
             </Field>
           </div>
         </div>
         <div className="mt-4 ml-auto max-w-xs space-y-1 text-sm">
           <div className="flex justify-between">
-            <span className="text-stone-500">Subtotal</span>
+            <span className="text-stone-500">{f.subtotal}</span>
             <span>{formatMoney(subtotal)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-stone-500">Tax</span>
+            <span className="text-stone-500">{f.tax}</span>
             <span>{formatMoney(tax)}</span>
           </div>
           <div className="flex justify-between text-base font-semibold text-stone-900 dark:text-stone-50">
-            <span>Total</span>
+            <span>{f.total}</span>
             <span>{formatMoney(total)}</span>
           </div>
         </div>
@@ -207,7 +210,7 @@ export function InvoiceForm({
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       <Button type="submit" disabled={pending}>
-        {pending ? "Saving..." : invoice ? "Save changes" : "Create invoice"}
+        {pending ? f.saving : invoice ? f.saveChanges : f.create}
       </Button>
     </form>
   );

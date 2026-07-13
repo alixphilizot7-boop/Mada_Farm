@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge, Card, PageHeader } from "@/components/ui";
 import { formatDate, formatMoney } from "@/lib/format";
+import { getDictionary } from "@/lib/i18n/locale";
 import { EditItemForm } from "./edit-item-form";
 import { RecordPurchaseForm } from "../record-purchase-form";
 import { MarkOrderedButton, UndoPurchaseButton } from "../status-buttons";
@@ -20,6 +21,7 @@ export default async function CapexItemPage({
 }) {
   const session = await auth();
   if (session?.user.role !== "ADMIN") redirect("/");
+  const { t } = await getDictionary();
 
   const { id } = await params;
   const item = await prisma.capexItem.findUnique({ where: { id } });
@@ -30,7 +32,7 @@ export default async function CapexItemPage({
       <PageHeader title={item.name} description={item.category} />
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <Badge tone={STATUS_TONE[item.status]}>{item.status}</Badge>
+        <Badge tone={STATUS_TONE[item.status]}>{t.capexStatus[item.status]}</Badge>
         {item.status === "PLANNED" && <MarkOrderedButton id={item.id} />}
         {item.status !== "PURCHASED" && <RecordPurchaseForm item={item} />}
         {item.status === "PURCHASED" && <UndoPurchaseButton id={item.id} />}
@@ -38,18 +40,18 @@ export default async function CapexItemPage({
 
       {item.status === "PURCHASED" && (
         <Card className="mb-6">
-          <p className="text-xs text-stone-500 dark:text-stone-400">Actually paid</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{t.capex.actuallyPaid}</p>
           <p className="text-xl font-semibold text-emerald-600">
             {item.actualQuantity} × {formatMoney(item.actualUnitCost ?? 0)} = {formatMoney(item.actualTotal ?? 0)}
           </p>
           {item.purchaseDate && (
-            <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">on {formatDate(item.purchaseDate)}</p>
+            <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">{t.capex.on} {formatDate(item.purchaseDate)}</p>
           )}
         </Card>
       )}
 
       <Card>
-        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">Edit item</h2>
+        <h2 className="mb-4 text-sm font-semibold text-stone-700 dark:text-stone-200">{t.capex.editItem}</h2>
         <EditItemForm item={item} />
       </Card>
     </div>
