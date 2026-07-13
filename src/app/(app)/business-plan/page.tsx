@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, PageHeader, Table, TBody, Td, Th, THead } from "@/components/ui";
 import { formatDate, formatMoney } from "@/lib/format";
 import { getFarmSettings, planYearForDate } from "@/lib/farm-settings";
+import { getDictionary } from "@/lib/i18n/locale";
 
 function ProgressBar({ pct }: { pct: number }) {
   const clamped = Math.max(0, Math.min(100, pct));
@@ -18,6 +19,8 @@ function ProgressBar({ pct }: { pct: number }) {
 export default async function BusinessPlanPage() {
   const session = await auth();
   if (session?.user.role !== "ADMIN") redirect("/");
+  const { t } = await getDictionary();
+  const bp = t.businessPlan;
 
   const settings = await getFarmSettings();
   const now = new Date();
@@ -27,11 +30,10 @@ export default async function BusinessPlanPage() {
     const daysUntilStart = Math.ceil((settings.farmStartDate.getTime() - now.getTime()) / 86400000);
     return (
       <div>
-        <PageHeader title="Business Plan" description="Actual performance vs. your 5-year plan targets." />
+        <PageHeader title={bp.title} description={bp.description} />
         <Card>
           <p className="text-sm text-stone-600 dark:text-stone-300">
-            Farm operations are set to start on {formatDate(settings.farmStartDate)} — {daysUntilStart} day(s) from
-            now. Tracking against Year 1 targets will begin then.
+            {bp.startsOn} {formatDate(settings.farmStartDate)} — {daysUntilStart} {bp.daysFromNow}
           </p>
         </Card>
       </div>
@@ -60,32 +62,32 @@ export default async function BusinessPlanPage() {
 
   const rows = planYear
     ? [
-        { label: "Eggs produced", target: planYear.targetEggs, actual: actualEggs, isMoney: false },
-        { label: "Chicks sold", target: planYear.targetChicksSold, actual: actualChicksSold, isMoney: false },
-        { label: "Revenue", target: planYear.targetRevenue, actual: actualRevenue, isMoney: true },
-        { label: "Costs", target: planYear.targetCosts, actual: actualCosts, isMoney: true },
-        { label: "Net result", target: planYear.targetNetResult, actual: actualNet, isMoney: true },
+        { label: bp.eggsProduced, target: planYear.targetEggs, actual: actualEggs, isMoney: false },
+        { label: bp.chicksSold, target: planYear.targetChicksSold, actual: actualChicksSold, isMoney: false },
+        { label: bp.revenue, target: planYear.targetRevenue, actual: actualRevenue, isMoney: true },
+        { label: bp.costs, target: planYear.targetCosts, actual: actualCosts, isMoney: true },
+        { label: bp.netResult, target: planYear.targetNetResult, actual: actualNet, isMoney: true },
       ]
     : [];
 
   return (
     <div>
       <PageHeader
-        title="Business Plan"
+        title={bp.title}
         description={
           year > 5
-            ? "Beyond your original 5-year plan — nothing further to compare against."
-            : `Year ${year} of 5 · ${formatDate(yearStart)} – ${formatDate(yearEnd)}`
+            ? bp.beyondPlan
+            : `${bp.yearOf5} ${year} ${bp.of5} · ${formatDate(yearStart)} – ${formatDate(yearEnd)}`
         }
       />
 
       {planYear && (
         <Table>
           <THead>
-            <Th>Metric</Th>
-            <Th>Target (Year {year})</Th>
-            <Th>Actual so far</Th>
-            <Th>Progress</Th>
+            <Th>{bp.metric}</Th>
+            <Th>{bp.target} {year})</Th>
+            <Th>{bp.actualSoFar}</Th>
+            <Th>{bp.progress}</Th>
           </THead>
           <TBody>
             {rows.map((r) => {

@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge, Card, EmptyState, PageHeader, Table, TBody, Td, Th, THead } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
+import { getDictionary } from "@/lib/i18n/locale";
 
 const ACTION_TONE = {
   CREATE: "green",
@@ -17,6 +18,8 @@ export default async function AuditPage({
 }) {
   const session = await auth();
   if (session?.user.role !== "ADMIN") redirect("/");
+  const { t } = await getDictionary();
+  const a = t.audit;
 
   const { entity } = await searchParams;
 
@@ -32,10 +35,7 @@ export default async function AuditPage({
 
   return (
     <div>
-      <PageHeader
-        title="Audit Log"
-        description="Every create, update and delete across the farm — who did what, and when."
-      />
+      <PageHeader title={a.title} description={a.description} />
 
       <Card className="mb-6">
         <div className="flex flex-wrap gap-2">
@@ -43,7 +43,7 @@ export default async function AuditPage({
             href="/audit"
             className={`rounded-full px-3 py-1 text-xs font-medium ${!entity ? "bg-emerald-600 text-white" : "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300"}`}
           >
-            All
+            {a.all}
           </a>
           {entities.map((e) => (
             <a
@@ -58,15 +58,15 @@ export default async function AuditPage({
       </Card>
 
       {logs.length === 0 ? (
-        <EmptyState>No activity recorded yet.</EmptyState>
+        <EmptyState>{a.emptyState}</EmptyState>
       ) : (
         <Table>
           <THead>
-            <Th>When</Th>
-            <Th>Entity</Th>
-            <Th>Action</Th>
-            <Th>Summary</Th>
-            <Th>By</Th>
+            <Th>{a.when}</Th>
+            <Th>{a.entity}</Th>
+            <Th>{a.action}</Th>
+            <Th>{a.summary}</Th>
+            <Th>{a.by}</Th>
           </THead>
           <TBody>
             {logs.map((log) => (

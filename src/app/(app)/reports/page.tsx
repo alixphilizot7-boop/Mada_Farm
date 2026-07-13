@@ -3,11 +3,7 @@ import { auth } from "@/auth";
 import { Card, LinkButton, PageHeader, Table, TBody, Td, Th, THead } from "@/components/ui";
 import { formatMoney } from "@/lib/format";
 import { computeFinancialReport } from "@/lib/reports";
-
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
+import { getDictionary } from "@/lib/i18n/locale";
 
 export default async function ReportsPage({
   searchParams,
@@ -16,6 +12,9 @@ export default async function ReportsPage({
 }) {
   const session = await auth();
   if (session?.user.role !== "ADMIN") redirect("/");
+  const { t } = await getDictionary();
+  const r = t.reports;
+  const MONTH_NAMES = r.months;
 
   const { year: yearParam, month: monthParam } = await searchParams;
   const now = new Date();
@@ -27,25 +26,25 @@ export default async function ReportsPage({
 
   const report = await computeFinancialReport(start, end);
 
-  const periodLabel = month !== undefined ? `${MONTH_NAMES[month]} ${year}` : `Year ${year}`;
+  const periodLabel = month !== undefined ? `${MONTH_NAMES[month]} ${year}` : `${year}`;
   const pdfHref = month !== undefined ? `/api/reports/pdf?year=${year}&month=${month}` : `/api/reports/pdf?year=${year}`;
 
   return (
     <div>
       <PageHeader
-        title="Reports"
-        description={`Income statement for ${periodLabel}.`}
-        action={<LinkButton href={pdfHref} variant="secondary">Download PDF</LinkButton>}
+        title={r.title}
+        description={`${r.incomeStatementFor} ${periodLabel}.`}
+        action={<LinkButton href={pdfHref} variant="secondary">{r.downloadPdf}</LinkButton>}
       />
 
       <Card className="mb-6">
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-stone-500 dark:text-stone-400">View:</span>
+          <span className="text-stone-500 dark:text-stone-400">{r.view}</span>
           <a
             href={`/reports?year=${year}`}
             className={`rounded-full px-3 py-1 text-xs font-medium ${month === undefined ? "bg-emerald-600 text-white" : "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300"}`}
           >
-            Full year
+            {r.fullYear}
           </a>
           {MONTH_NAMES.map((name, i) => (
             <a
@@ -68,31 +67,31 @@ export default async function ReportsPage({
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Card>
-          <p className="text-xs text-stone-500 dark:text-stone-400">Total revenue</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{r.totalRevenue}</p>
           <p className="text-xl font-semibold text-emerald-600">{formatMoney(report.totalIncome)}</p>
         </Card>
         <Card>
-          <p className="text-xs text-stone-500 dark:text-stone-400">Total costs</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{r.totalCosts}</p>
           <p className="text-xl font-semibold text-red-600">{formatMoney(report.totalExpense)}</p>
         </Card>
         <Card>
-          <p className="text-xs text-stone-500 dark:text-stone-400">Net result</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{r.netResult}</p>
           <p className="text-xl font-semibold text-stone-900 dark:text-stone-50">
             {formatMoney(report.net)}{" "}
-            <span className="text-sm font-normal text-stone-400">({report.marginPct.toFixed(1)}% margin)</span>
+            <span className="text-sm font-normal text-stone-400">({report.marginPct.toFixed(1)}% {r.margin})</span>
           </p>
         </Card>
       </div>
 
       <Card className="mb-6">
-        <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">Revenue</h2>
+        <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">{r.revenue}</h2>
         {report.incomeByCategory.length === 0 ? (
-          <p className="text-sm text-stone-500 dark:text-stone-400">No income recorded for this period.</p>
+          <p className="text-sm text-stone-500 dark:text-stone-400">{r.noIncome}</p>
         ) : (
           <Table>
             <THead>
-              <Th>Category</Th>
-              <Th>Amount</Th>
+              <Th>{r.category}</Th>
+              <Th>{r.amount}</Th>
             </THead>
             <TBody>
               {report.incomeByCategory.map((l) => (
@@ -107,14 +106,14 @@ export default async function ReportsPage({
       </Card>
 
       <Card>
-        <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">Costs</h2>
+        <h2 className="mb-3 text-sm font-semibold text-stone-700 dark:text-stone-200">{r.costs}</h2>
         {report.expenseByCategory.length === 0 ? (
-          <p className="text-sm text-stone-500 dark:text-stone-400">No expenses recorded for this period.</p>
+          <p className="text-sm text-stone-500 dark:text-stone-400">{r.noExpenses}</p>
         ) : (
           <Table>
             <THead>
-              <Th>Category</Th>
-              <Th>Amount</Th>
+              <Th>{r.category}</Th>
+              <Th>{r.amount}</Th>
             </THead>
             <TBody>
               {report.expenseByCategory.map((l) => (
