@@ -8,7 +8,6 @@ import { CashFlowChart } from "@/components/charts/cash-flow-chart";
 import { ChickProductionChart } from "@/components/charts/chick-production-chart";
 import { computeVaccinationAlerts } from "@/lib/vaccination-schedule";
 import { getDictionary } from "@/lib/i18n/locale";
-import { RoastChickenBg } from "@/components/roast-chicken-bg";
 
 function startOfDay(d: Date) {
   const copy = new Date(d);
@@ -117,8 +116,7 @@ export default async function DashboardPage() {
   const mortalityThisMonth = mortalityAgg._sum.quantity ?? 0;
 
   return (
-    <div className="relative">
-      <RoastChickenBg />
+    <div>
       <PageHeader
         title={`${t.dashboard.welcome}, ${session?.user?.name ?? ""}`}
         description={t.dashboard.subtitle}
