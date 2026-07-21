@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "CapexStatus" ADD VALUE 'DEFERRED';
+
+-- AlterTable
+ALTER TABLE "FarmSettings" ADD COLUMN     "mgaPerEur" DOUBLE PRECISION NOT NULL DEFAULT 4800;

@@ -12,6 +12,7 @@ const STATUS_TONE = {
   PLANNED: "zinc",
   ORDERED: "blue",
   PURCHASED: "green",
+  DEFERRED: "amber",
 } as const;
 
 export default async function CapexItemPage({

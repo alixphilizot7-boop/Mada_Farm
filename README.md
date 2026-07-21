@@ -60,6 +60,16 @@ Pour créer un compte Copine ou Employé : se connecter en Admin, aller sur `/us
 
 Chaque tâche a maintenant, en plus du texte libre "Échéance / période", un champ **Date d'échéance** optionnel (`dueDate`) — c'est ce qui permettra de détecter automatiquement les deadlines dépassées pour les notifications à venir.
 
+## Construction & Équipement (Capex)
+
+Le module `/capex` liste les ~44 achats de démarrage du business plan, groupés par catégorie (Construction, Clôture, Équipement, Biosécurité, Santé, Troupeau, Provende, Eau, Admin, Marketing, Divers), avec sous-total par catégorie, total de démarrage (~3 819 €), écart budget vs réel, et une colonne Ariary calculée en direct depuis le taux de change réglable dans `/settings`. Les 3 lignes marquées "Reporté (Année 2)" (retourneur d'œufs, onduleur/panneau solaire, prospection hôtels) restent visibles mais sont exclues du total de démarrage.
+
+**Pour tester en local :**
+1. Aller sur `/capex` — vérifier que le total de démarrage affiche bien ≈ 3 819 €.
+2. Aller sur `/settings`, changer le taux de change (ex. 4900), revenir sur `/capex` — la colonne Ariary et les totaux Ar se mettent à jour immédiatement.
+3. Cliquer sur "Marquer comme commandé" puis "Enregistrer l'achat" sur un article pour voir l'écart budget vs réel apparaître.
+4. Exporter en CSV.
+
 ## Prisma
 
 ```bash

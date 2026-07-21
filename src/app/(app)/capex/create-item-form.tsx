@@ -26,6 +26,12 @@ export function CreateItemForm() {
       <Field label={f.plannedUnitCost}>
         <input name="plannedUnitCost" type="number" min={0} step="any" className={inputClass} />
       </Field>
+      <Field label={t.common.status}>
+        <select name="status" defaultValue="PLANNED" className={inputClass}>
+          <option value="PLANNED">{t.capexStatus.PLANNED}</option>
+          <option value="DEFERRED">{t.capexStatus.DEFERRED}</option>
+        </select>
+      </Field>
       <Field label={f.supplier}>
         <input name="supplier" placeholder={f.supplierPlaceholder} className={inputClass} />
       </Field>

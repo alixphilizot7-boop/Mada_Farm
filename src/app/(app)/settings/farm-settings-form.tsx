@@ -24,6 +24,18 @@ export function FarmSettingsForm({ settings }: { settings: FarmSettings }) {
         />
       </Field>
       <p className="text-xs text-stone-500 dark:text-stone-400">{s.farmStartDateHint}</p>
+      <Field label={s.exchangeRate}>
+        <input
+          name="mgaPerEur"
+          type="number"
+          min={0}
+          step="any"
+          required
+          defaultValue={settings.mgaPerEur}
+          className={inputClass}
+        />
+      </Field>
+      <p className="text-xs text-stone-500 dark:text-stone-400">{s.exchangeRateHint}</p>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <Button type="submit" disabled={pending}>
         {pending ? s.saving : s.save}

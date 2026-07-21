@@ -28,6 +28,14 @@ export function EditItemForm({ item }: { item: CapexItem }) {
       <Field label={f.plannedUnitCost}>
         <input name="plannedUnitCost" type="number" min={0} step="any" defaultValue={item.plannedUnitCost ?? ""} className={inputClass} />
       </Field>
+      {(item.status === "PLANNED" || item.status === "DEFERRED") && (
+        <Field label={t.common.status}>
+          <select name="status" defaultValue={item.status} className={inputClass}>
+            <option value="PLANNED">{t.capexStatus.PLANNED}</option>
+            <option value="DEFERRED">{t.capexStatus.DEFERRED}</option>
+          </select>
+        </Field>
+      )}
       <Field label={f.supplier}>
         <input name="supplier" defaultValue={item.supplier ?? ""} className={inputClass} />
       </Field>
