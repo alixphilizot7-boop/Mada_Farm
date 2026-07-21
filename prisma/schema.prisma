@@ -10,6 +10,7 @@ datasource db {
 enum Role {
   ADMIN
   STAFF
+  EMPLOYEE
 }
 
 model FarmSettings {
@@ -422,6 +423,7 @@ model Task {
   status      TaskStatus        @default(TODO)
   priority    TaskPriority      @default(MEDIUM)
   period      String?
+  dueDate     DateTime?
   notes       String?
   order       Int
   createdAt   DateTime          @default(now())
@@ -429,6 +431,7 @@ model Task {
 
   @@index([groupId])
   @@index([status])
+  @@index([dueDate])
 }
 
 model DailyLog {

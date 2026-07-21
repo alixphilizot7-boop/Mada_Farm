@@ -6,7 +6,8 @@ import { clsx } from "clsx";
 import { Badge, Card, EmptyState, inputClass } from "@/components/ui";
 import { TaskStatusSelect } from "./status-select";
 import { useI18n } from "@/components/i18n-provider";
-import type { Task, TaskGroup, TaskPriority, TaskResponsible } from "@prisma/client";
+import { formatDate } from "@/lib/format";
+import type { Task, TaskGroup, TaskPriority, TaskResponsible, TaskStatus } from "@prisma/client";
 
 type GroupWithTasks = TaskGroup & { tasks: Task[] };
 
@@ -16,7 +17,14 @@ const PRIORITY_TONE: Record<TaskPriority, "red" | "amber" | "zinc"> = {
   LOW: "zinc",
 };
 
-export function TaskBoard({ groups }: { groups: GroupWithTasks[] }) {
+const STATUS_TONE: Record<TaskStatus, "zinc" | "blue" | "green" | "red"> = {
+  TODO: "zinc",
+  IN_PROGRESS: "blue",
+  DONE: "green",
+  BLOCKED: "red",
+};
+
+export function TaskBoard({ groups, canEditAll }: { groups: GroupWithTasks[]; canEditAll: boolean }) {
   const { t } = useI18n();
   const j = t.tasks;
   const [responsibleFilter, setResponsibleFilter] = useState<TaskResponsible | "ALL">("ALL");
@@ -89,31 +97,43 @@ export function TaskBoard({ groups }: { groups: GroupWithTasks[] }) {
                 <EmptyState>{j.emptyState}</EmptyState>
               ) : (
                 <div className="space-y-2">
-                  {group.visibleTasks.map((task) => (
-                    <div
-                      key={task.id}
-                      className="flex flex-col gap-2 rounded-xl border border-stone-200/80 p-3 dark:border-stone-800 sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <Link
-                          href={`/tasks/${task.id}`}
-                          className="font-medium text-stone-900 hover:underline dark:text-stone-100"
-                        >
-                          {task.title}
-                        </Link>
-                        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400">
-                          {task.responsible.map((r) => (
-                            <Badge key={r} tone="blue">
-                              {j.responsibleLabels[r]}
-                            </Badge>
-                          ))}
-                          <Badge tone={PRIORITY_TONE[task.priority]}>{j.priorityLabels[task.priority]}</Badge>
-                          {task.period && <span>{task.period}</span>}
+                  {group.visibleTasks.map((task) => {
+                    const canEditThis = canEditAll || task.responsible.includes("EMPLOYEE");
+                    return (
+                      <div
+                        key={task.id}
+                        className="flex flex-col gap-2 rounded-xl border border-stone-200/80 p-3 dark:border-stone-800 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="min-w-0 flex-1">
+                          {canEditAll ? (
+                            <Link
+                              href={`/tasks/${task.id}`}
+                              className="font-medium text-stone-900 hover:underline dark:text-stone-100"
+                            >
+                              {task.title}
+                            </Link>
+                          ) : (
+                            <span className="font-medium text-stone-900 dark:text-stone-100">{task.title}</span>
+                          )}
+                          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400">
+                            {task.responsible.map((r) => (
+                              <Badge key={r} tone="blue">
+                                {j.responsibleLabels[r]}
+                              </Badge>
+                            ))}
+                            <Badge tone={PRIORITY_TONE[task.priority]}>{j.priorityLabels[task.priority]}</Badge>
+                            {task.dueDate && <span>{formatDate(task.dueDate)}</span>}
+                            {task.period && <span>{task.period}</span>}
+                          </div>
                         </div>
+                        {canEditThis ? (
+                          <TaskStatusSelect taskId={task.id} status={task.status} />
+                        ) : (
+                          <Badge tone={STATUS_TONE[task.status]}>{j.statusLabels[task.status]}</Badge>
+                        )}
                       </div>
-                      <TaskStatusSelect taskId={task.id} status={task.status} />
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </Card>

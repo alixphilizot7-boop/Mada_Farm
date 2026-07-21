@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, EmptyState, LinkButton, PageHeader, Table, TBody, Td, Th, THead } from "@/components/ui";
 import { formatDate, formatMoney } from "@/lib/format";
@@ -6,6 +7,9 @@ import { getDictionary } from "@/lib/i18n/locale";
 import { CreateDailyLogForm } from "./daily-log-form";
 
 export default async function JournalPage() {
+  const session = await auth();
+  const isEmployee = session?.user.role === "EMPLOYEE";
+
   const [flocks, feedItems, logs] = await Promise.all([
     prisma.flock.findMany({ where: { status: "ACTIVE" }, orderBy: { name: "asc" } }),
     prisma.inventoryItem.findMany({ where: { type: "FEED" }, orderBy: { name: "asc" } }),
@@ -57,7 +61,7 @@ export default async function JournalPage() {
             <Th>{j.sales}</Th>
             <Th>{j.weatherCol}</Th>
             <Th>{j.recordedBy}</Th>
-            <Th></Th>
+            {!isEmployee && <Th></Th>}
           </THead>
           <TBody>
             {logs.map((log) => (
@@ -71,11 +75,13 @@ export default async function JournalPage() {
                 <Td>{log.cashTxn ? formatMoney(log.cashTxn.amount) : t.common.none}</Td>
                 <Td>{log.weather ?? t.common.none}</Td>
                 <Td>{log.recordedBy.name}</Td>
-                <Td>
-                  <Link href={`/journal/${log.id}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
-                    {t.common.edit}
-                  </Link>
-                </Td>
+                {!isEmployee && (
+                  <Td>
+                    <Link href={`/journal/${log.id}`} className="text-emerald-700 hover:underline dark:text-emerald-400">
+                      {t.common.edit}
+                    </Link>
+                  </Td>
+                )}
               </tr>
             ))}
           </TBody>

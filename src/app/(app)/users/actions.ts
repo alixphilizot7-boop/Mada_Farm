@@ -11,7 +11,7 @@ const createUserSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(6),
-  role: z.enum(["ADMIN", "STAFF"]),
+  role: z.enum(["ADMIN", "STAFF", "EMPLOYEE"]),
 });
 
 export async function createUserAction(_prevState: string | undefined, formData: FormData) {
@@ -75,7 +75,7 @@ const updateUserSchema = z.object({
   userId: z.string().min(1),
   name: z.string().min(1),
   email: z.string().email(),
-  role: z.enum(["ADMIN", "STAFF"]),
+  role: z.enum(["ADMIN", "STAFF", "EMPLOYEE"]),
 });
 
 export async function updateUserAction(_prevState: string | undefined, formData: FormData) {

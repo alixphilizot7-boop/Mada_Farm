@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser, AuthError } from "@/lib/require-user";
+import { formatDate } from "@/lib/format";
 
 function csvCell(value: unknown) {
   const str = value === null || value === undefined ? "" : String(value);
@@ -20,7 +21,7 @@ export async function GET() {
     include: { tasks: { orderBy: { order: "asc" } } },
   });
 
-  const header = ["Phase", "Task", "Responsible", "Status", "Priority", "Due / period", "Notes"];
+  const header = ["Phase", "Task", "Responsible", "Status", "Priority", "Due date", "Period", "Notes"];
 
   const rows = groups.flatMap((group) =>
     group.tasks.map((task) => [
@@ -29,6 +30,7 @@ export async function GET() {
       task.responsible.join("/"),
       task.status,
       task.priority,
+      task.dueDate ? formatDate(task.dueDate) : "",
       task.period ?? "",
       task.notes ?? "",
     ])

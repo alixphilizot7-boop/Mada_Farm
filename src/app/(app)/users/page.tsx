@@ -43,8 +43,8 @@ export default async function UsersPage() {
               <Td>{user.name}</Td>
               <Td>{user.email}</Td>
               <Td>
-                <Badge tone={user.role === "ADMIN" ? "blue" : "zinc"}>
-                  {user.role === "ADMIN" ? u.roleAdmin : u.roleStaff}
+                <Badge tone={user.role === "ADMIN" ? "blue" : user.role === "EMPLOYEE" ? "amber" : "zinc"}>
+                  {user.role === "ADMIN" ? u.roleAdmin : user.role === "EMPLOYEE" ? u.roleEmployee : u.roleStaff}
                 </Badge>
               </Td>
               <Td>

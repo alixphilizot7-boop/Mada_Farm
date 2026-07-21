@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { updateTaskAction, deleteTaskAction } from "../actions";
 import { Button, Field, inputClass } from "@/components/ui";
 import { useI18n } from "@/components/i18n-provider";
+import { toDateInputValue } from "@/lib/format";
 import type { Task, TaskGroup } from "@prisma/client";
 
 export function EditTaskForm({ task, groups }: { task: Task; groups: TaskGroup[] }) {
@@ -55,12 +56,15 @@ export function EditTaskForm({ task, groups }: { task: Task; groups: TaskGroup[]
           </div>
         </div>
 
-        <div className="sm:col-span-2">
+        <Field label={j.dueDate}>
+          <input name="dueDate" type="date" defaultValue={task.dueDate ? toDateInputValue(task.dueDate) : ""} className={inputClass} />
+        </Field>
+        <div className="sm:col-span-2 lg:col-span-3">
           <Field label={j.period}>
             <input name="period" placeholder={j.periodPlaceholder} defaultValue={task.period ?? ""} className={inputClass} />
           </Field>
         </div>
-        <div className="sm:col-span-2">
+        <div className="sm:col-span-2 lg:col-span-4">
           <Field label={j.notes}>
             <input name="notes" defaultValue={task.notes ?? ""} className={inputClass} />
           </Field>

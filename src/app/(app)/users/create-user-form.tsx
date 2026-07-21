@@ -24,6 +24,7 @@ export function CreateUserForm() {
       <Field label={f.role}>
         <select name="role" defaultValue="STAFF" className={inputClass}>
           <option value="STAFF">{t.users.roleStaff}</option>
+          <option value="EMPLOYEE">{t.users.roleEmployee}</option>
           <option value="ADMIN">{t.users.roleAdmin}</option>
         </select>
       </Field>

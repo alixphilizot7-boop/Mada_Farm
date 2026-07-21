@@ -17,6 +17,7 @@ const schema = z.object({
   responsible: z.array(responsibleEnum).default([]),
   priority: priorityEnum,
   period: z.string().optional(),
+  dueDate: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -29,14 +30,16 @@ export async function createTaskAction(_prevState: string | undefined, formData:
     responsible: formData.getAll("responsible"),
     priority: formData.get("priority"),
     period: formData.get("period") || undefined,
+    dueDate: formData.get("dueDate") || undefined,
     notes: formData.get("notes") || undefined,
   });
   if (!parsed.success) return "Please fill in the required fields correctly.";
 
   const count = await prisma.task.count({ where: { groupId: parsed.data.groupId } });
+  const { dueDate, ...rest } = parsed.data;
 
   const task = await prisma.task.create({
-    data: { ...parsed.data, order: count },
+    data: { ...rest, dueDate: dueDate ? new Date(dueDate) : null, order: count },
     include: { group: true },
   });
 
@@ -63,15 +66,16 @@ export async function updateTaskAction(_prevState: string | undefined, formData:
     responsible: formData.getAll("responsible"),
     priority: formData.get("priority"),
     period: formData.get("period") || undefined,
+    dueDate: formData.get("dueDate") || undefined,
     notes: formData.get("notes") || undefined,
   });
   if (!parsed.success) return "Please fill in the required fields correctly.";
 
-  const { id, ...data } = parsed.data;
+  const { id, dueDate, ...data } = parsed.data;
 
   const task = await prisma.task.update({
     where: { id },
-    data: { ...data, period: data.period ?? null, notes: data.notes ?? null },
+    data: { ...data, period: data.period ?? null, dueDate: dueDate ? new Date(dueDate) : null, notes: data.notes ?? null },
     include: { group: true },
   });
 

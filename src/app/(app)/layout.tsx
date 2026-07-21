@@ -60,7 +60,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     { href: "/settings", label: t.nav.settings, icon: Settings },
   ];
 
-  const items = session.user.role === "ADMIN" ? [...NAV, ...ADMIN_NAV] : NAV;
+  // Employee is a read-only + "log today's entry" role — Journal already
+  // covers their daily input, so the dedicated operational modules and the
+  // admin section stay hidden for them (also enforced in src/proxy.ts).
+  const EMPLOYEE_NAV = [
+    { href: "/", label: t.nav.dashboard, icon: LayoutDashboard },
+    { href: "/journal", label: t.nav.journal, icon: NotebookPen },
+    { href: "/tasks", label: t.nav.tasks, icon: ListChecks },
+  ];
+
+  const visibleNav = session.user.role === "EMPLOYEE" ? EMPLOYEE_NAV : NAV;
+  const items =
+    session.user.role === "ADMIN" ? [...NAV, ...ADMIN_NAV] : session.user.role === "EMPLOYEE" ? EMPLOYEE_NAV : NAV;
 
   return (
     <div className="flex min-h-screen bg-stone-100 dark:bg-stone-950">
@@ -80,7 +91,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <LanguageToggle />
         </div>
         <nav className="flex flex-1 flex-col gap-1 overflow-y-auto">
-          {NAV.map((item) => (
+          {visibleNav.map((item) => (
             <NavLink key={item.href} href={item.href} icon={<item.icon className="h-4 w-4" />}>
               {item.label}
             </NavLink>

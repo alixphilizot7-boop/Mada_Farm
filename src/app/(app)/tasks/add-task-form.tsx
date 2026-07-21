@@ -48,12 +48,15 @@ export function AddTaskForm({ groups }: { groups: TaskGroup[] }) {
         </div>
       </div>
 
-      <div className="sm:col-span-2">
+      <Field label={j.dueDate}>
+        <input name="dueDate" type="date" className={inputClass} />
+      </Field>
+      <div className="sm:col-span-2 lg:col-span-3">
         <Field label={j.period}>
           <input name="period" placeholder={j.periodPlaceholder} className={inputClass} />
         </Field>
       </div>
-      <div className="sm:col-span-2">
+      <div className="sm:col-span-2 lg:col-span-4">
         <Field label={j.notes}>
           <input name="notes" className={inputClass} />
         </Field>

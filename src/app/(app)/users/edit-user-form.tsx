@@ -32,6 +32,7 @@ export function EditUserForm({ user, isSelf }: { user: User; isSelf: boolean }) 
       <Field label={u.role}>
         <select name="role" defaultValue={user.role} disabled={isSelf} className={`${inputClass} w-28`}>
           <option value="STAFF">{u.roleStaff}</option>
+          <option value="EMPLOYEE">{u.roleEmployee}</option>
           <option value="ADMIN">{u.roleAdmin}</option>
         </select>
       </Field>

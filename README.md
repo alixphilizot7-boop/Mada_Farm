@@ -48,6 +48,18 @@ Les données de démarrage (les 31 tâches fournies) sont déjà chargées dans 
 
 Le mode hors-ligne (PWA, IndexedDB, synchronisation) n'est pas encore construit pour ce module ni pour le Journal quotidien — c'est la prochaine étape.
 
+## Rôles et permissions
+
+Trois rôles de connexion : **Admin** (Alix — accès complet, y compris factures/trésorerie/paramètres), **Staff** (Copine — accès complet aux modules opérationnels : journal, tâches, troupeaux, œufs, poussins, santé, mortalité, nourriture & eau), **Employé** — accès restreint : tableau de bord, Journal quotidien (saisie du jour + historique en lecture seule, pas de modification d'entrées passées) et Plan d'action (peut changer le statut uniquement des tâches où il est listé comme responsable, pas d'ajout/modification/suppression de tâches). Les modules Troupeaux/Œufs/Poussins/Nourriture & Eau/Santé/Mortalité lui sont fermés (le Journal couvre déjà sa saisie quotidienne).
+
+Pour créer un compte Copine ou Employé : se connecter en Admin, aller sur `/users`, "Ajouter un nouveau compte" et choisir le rôle.
+
+**Traçabilité** : chaque création/modification/suppression (y compris un changement de statut de tâche) est déjà enregistrée dans le **Journal d'audit** (`/audit`, réservé Admin) avec l'auteur et l'horodatage exact — filtrable par type d'entité (Task, DailyLog, etc.).
+
+## Échéances des tâches
+
+Chaque tâche a maintenant, en plus du texte libre "Échéance / période", un champ **Date d'échéance** optionnel (`dueDate`) — c'est ce qui permettra de détecter automatiquement les deadlines dépassées pour les notifications à venir.
+
 ## Prisma
 
 ```bash
