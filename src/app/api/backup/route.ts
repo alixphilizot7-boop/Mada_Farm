@@ -27,6 +27,9 @@ export async function GET() {
     auditLogs,
     farmSettings,
     planYears,
+    dailyLogs,
+    taskGroups,
+    tasks,
   ] = await Promise.all([
     prisma.user.findMany(),
     prisma.flock.findMany(),
@@ -45,6 +48,9 @@ export async function GET() {
     prisma.auditLog.findMany(),
     prisma.farmSettings.findMany(),
     prisma.planYear.findMany(),
+    prisma.dailyLog.findMany(),
+    prisma.taskGroup.findMany(),
+    prisma.task.findMany(),
   ]);
 
   const backup = {
@@ -66,6 +72,9 @@ export async function GET() {
     auditLogs,
     farmSettings,
     planYears,
+    dailyLogs,
+    taskGroups,
+    tasks,
   };
 
   const now = new Date();

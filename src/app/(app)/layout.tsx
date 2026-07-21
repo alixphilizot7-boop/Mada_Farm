@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import {
   LayoutDashboard,
+  NotebookPen,
+  ListChecks,
   Bird,
   Egg,
   Feather,
@@ -36,6 +38,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const NAV = [
     { href: "/", label: t.nav.dashboard, icon: LayoutDashboard },
+    { href: "/journal", label: t.nav.journal, icon: NotebookPen },
+    { href: "/tasks", label: t.nav.tasks, icon: ListChecks },
     { href: "/flocks", label: t.nav.flocks, icon: Bird },
     { href: "/eggs", label: t.nav.eggs, icon: Egg },
     { href: "/chicks", label: t.nav.chicks, icon: Feather },

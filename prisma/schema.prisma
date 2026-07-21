@@ -101,6 +101,7 @@ model User {
   auditLogs     AuditLog[]
   capexItems    CapexItem[]
   chickHatches  ChickHatch[]
+  dailyLogs     DailyLog[]
 }
 
 model Flock {
@@ -120,6 +121,7 @@ model Flock {
   healthRecords HealthRecord[]
   mortalityLogs MortalityLog[]
   chickHatches  ChickHatch[]
+  dailyLogs     DailyLog[]
 
   @@index([status])
 }
@@ -135,6 +137,8 @@ model EggLog {
   recordedById String
   recordedBy   User     @relation(fields: [recordedById], references: [id])
   createdAt    DateTime @default(now())
+
+  dailyLog DailyLog?
 
   @@index([date])
   @@index([flockId])
@@ -204,6 +208,8 @@ model Usage {
   recordedBy   User          @relation(fields: [recordedById], references: [id])
   createdAt    DateTime      @default(now())
 
+  dailyLog DailyLog?
+
   @@index([date])
 }
 
@@ -227,6 +233,7 @@ model HealthRecord {
 
   cashTxn      CashTransaction?
   mortalityLog MortalityLog?
+  dailyLog     DailyLog?
 
   @@index([date])
   @@index([flockId])
@@ -245,6 +252,8 @@ model MortalityLog {
   recordedById   String
   recordedBy     User          @relation(fields: [recordedById], references: [id])
   createdAt      DateTime      @default(now())
+
+  dailyLog DailyLog?
 
   @@index([date])
   @@index([flockId])
@@ -305,6 +314,7 @@ model CashTransaction {
   type           CashType
   category       String
   amount         Float
+  amountAriary   Float?
   description    String?
   invoiceId      String?       @unique
   invoice        Invoice?      @relation(fields: [invoiceId], references: [id])
@@ -317,6 +327,8 @@ model CashTransaction {
   recordedById   String
   recordedBy     User          @relation(fields: [recordedById], references: [id])
   createdAt      DateTime      @default(now())
+
+  dailyLog DailyLog?
 
   @@index([date])
   @@index([type])
@@ -367,4 +379,88 @@ model AuditLog {
 
   @@index([entity, entityId])
   @@index([createdAt])
+}
+
+enum TaskResponsible {
+  ALIX
+  COPINE
+  EMPLOYEE
+  LOCAL
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  BLOCKED
+}
+
+enum TaskPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model TaskGroup {
+  id        String   @id @default(cuid())
+  name      String
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tasks Task[]
+
+  @@index([order])
+}
+
+model Task {
+  id          String            @id @default(cuid())
+  groupId     String
+  group       TaskGroup         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  title       String
+  responsible TaskResponsible[]
+  status      TaskStatus        @default(TODO)
+  priority    TaskPriority      @default(MEDIUM)
+  period      String?
+  notes       String?
+  order       Int
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([groupId])
+  @@index([status])
+}
+
+model DailyLog {
+  id      String   @id @default(cuid())
+  date    DateTime
+  flockId String
+  flock   Flock    @relation(fields: [flockId], references: [id])
+  weather String?
+  notes   String?
+
+  eggsSold   Int?
+  chicksSold Int?
+
+  eggLogId String?  @unique
+  eggLog   EggLog?  @relation(fields: [eggLogId], references: [id])
+
+  mortalityLogId String?       @unique
+  mortalityLog   MortalityLog? @relation(fields: [mortalityLogId], references: [id])
+
+  usageId String? @unique
+  usage   Usage?  @relation(fields: [usageId], references: [id])
+
+  healthRecordId String?       @unique
+  healthRecord   HealthRecord? @relation(fields: [healthRecordId], references: [id])
+
+  cashTxnId String?          @unique
+  cashTxn   CashTransaction? @relation(fields: [cashTxnId], references: [id])
+
+  recordedById String
+  recordedBy   User     @relation(fields: [recordedById], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@index([date])
+  @@index([flockId])
 }

@@ -29,16 +29,18 @@ export default async function DashboardPage() {
   cashRangeStart.setDate(cashRangeStart.getDate() - 7 * 8);
 
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const todayStart = startOfDay(now);
 
   const chickRangeStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
-  const [flocks, eggLogs, chickHatches, items, mortalityAgg, vaccinationHistory, cashTxns, incomeAgg, expenseAgg, outstandingAgg] =
+  const [flocks, eggLogs, chickHatches, items, mortalityAgg, todayMortalityAgg, vaccinationHistory, cashTxns, incomeAgg, expenseAgg, outstandingAgg] =
     await Promise.all([
       prisma.flock.findMany({ where: { status: "ACTIVE" } }),
       prisma.eggLog.findMany({ where: { date: { gte: eggRangeStart } } }),
       prisma.chickHatch.findMany({ where: { date: { gte: chickRangeStart } } }),
       prisma.inventoryItem.findMany(),
       prisma.mortalityLog.aggregate({ _sum: { quantity: true }, where: { date: { gte: monthStart } } }),
+      prisma.mortalityLog.aggregate({ _sum: { quantity: true }, where: { date: { gte: todayStart } } }),
       prisma.healthRecord.findMany({
         where: { vaccinationType: { not: null } },
         select: { flockId: true, vaccinationType: true, date: true },
@@ -114,6 +116,7 @@ export default async function DashboardPage() {
   const totalExpense = expenseAgg._sum.amount ?? 0;
   const outstanding = outstandingAgg._sum.total ?? 0;
   const mortalityThisMonth = mortalityAgg._sum.quantity ?? 0;
+  const mortalityToday = todayMortalityAgg._sum.quantity ?? 0;
 
   return (
     <div>
@@ -157,6 +160,14 @@ export default async function DashboardPage() {
           }
         />
       </div>
+
+      {mortalityToday > 3 && (
+        <Card className="mb-6 border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950/30">
+          <p className="text-sm font-semibold text-red-800 dark:text-red-300">
+            {t.dashboard.highMortalityAlert} — {mortalityToday} {t.dashboard.highMortalityHint}
+          </p>
+        </Card>
+      )}
 
       {vaccinationAlerts.length > 0 && (
         <Card className="mb-6 border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
