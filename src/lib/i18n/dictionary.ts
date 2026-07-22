@@ -703,7 +703,7 @@ const en = {
     csvHeaders: ["Phase", "Task", "Responsible", "Status", "Priority", "Due date", "Period", "Notes"],
     responsibleLabels: {
       ALIX: "Alix",
-      COPINE: "Partner",
+      COPINE: "Courtney",
       EMPLOYEE: "Employee",
       LOCAL: "Local contact (carpenter/foreman)",
     },
@@ -1433,7 +1433,7 @@ const fr: typeof en = {
     csvHeaders: ["Phase", "Tâche", "Responsable", "Statut", "Priorité", "Date d'échéance", "Période", "Notes"],
     responsibleLabels: {
       ALIX: "Alix",
-      COPINE: "Copine",
+      COPINE: "Courtney",
       EMPLOYEE: "Employé",
       LOCAL: "Local (charpentier/référent)",
     },
