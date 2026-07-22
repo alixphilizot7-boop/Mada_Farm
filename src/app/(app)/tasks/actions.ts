@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
+import { getDictionary } from "@/lib/i18n/locale";
 
 const responsibleEnum = z.enum(["ALIX", "COPINE", "EMPLOYEE", "LOCAL"]);
 const statusEnum = z.enum(["TODO", "IN_PROGRESS", "DONE", "BLOCKED"]);
@@ -33,7 +34,8 @@ export async function createTaskAction(_prevState: string | undefined, formData:
     dueDate: formData.get("dueDate") || undefined,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const count = await prisma.task.count({ where: { groupId: parsed.data.groupId } });
   const { dueDate, ...rest } = parsed.data;
@@ -69,7 +71,8 @@ export async function updateTaskAction(_prevState: string | undefined, formData:
     dueDate: formData.get("dueDate") || undefined,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const { id, dueDate, ...data } = parsed.data;
 

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
+import { getDictionary } from "@/lib/i18n/locale";
 
 const schema = z.object({
   name: z.string().min(1),
@@ -24,7 +25,8 @@ export async function createCustomerAction(_prevState: string | undefined, formD
     address: formData.get("address") || undefined,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const customer = await prisma.customer.create({
     data: { ...parsed.data, email: parsed.data.email || undefined },
@@ -61,7 +63,8 @@ export async function updateCustomerAction(_prevState: string | undefined, formD
     address: formData.get("address") || undefined,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const customer = await prisma.customer.update({
     where: { id: parsed.data.id },

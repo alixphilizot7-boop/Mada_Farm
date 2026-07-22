@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser, AuthError } from "@/lib/require-user";
 import { formatDate } from "@/lib/format";
+import { getDictionary } from "@/lib/i18n/locale";
 
 function csvCell(value: unknown) {
   const str = value === null || value === undefined ? "" : String(value);
@@ -16,20 +17,22 @@ export async function GET() {
     throw error;
   }
 
+  const { t } = await getDictionary();
+
   const groups = await prisma.taskGroup.findMany({
     orderBy: { order: "asc" },
     include: { tasks: { orderBy: { order: "asc" } } },
   });
 
-  const header = ["Phase", "Task", "Responsible", "Status", "Priority", "Due date", "Period", "Notes"];
+  const header = t.tasks.csvHeaders;
 
   const rows = groups.flatMap((group) =>
     group.tasks.map((task) => [
       group.name,
       task.title,
-      task.responsible.join("/"),
-      task.status,
-      task.priority,
+      task.responsible.map((r) => t.tasks.responsibleLabels[r]).join("/"),
+      t.tasks.statusLabels[task.status],
+      t.tasks.priorityLabels[task.priority],
       task.dueDate ? formatDate(task.dueDate) : "",
       task.period ?? "",
       task.notes ?? "",

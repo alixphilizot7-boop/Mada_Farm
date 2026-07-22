@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
+import { getDictionary } from "@/lib/i18n/locale";
 
 const createUserSchema = z.object({
   name: z.string().min(1),
@@ -23,10 +24,11 @@ export async function createUserAction(_prevState: string | undefined, formData:
     password: formData.get("password"),
     role: formData.get("role"),
   });
-  if (!parsed.success) return "Please fill in all fields correctly (password must be 6+ characters).";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.users.errorInvalidCreate;
 
   const existing = await prisma.user.findUnique({ where: { email: parsed.data.email } });
-  if (existing) return "A user with that email already exists.";
+  if (existing) return t.users.errorDuplicateEmail;
 
   const passwordHash = await bcrypt.hash(parsed.data.password, 10);
   const user = await prisma.user.create({
@@ -52,8 +54,9 @@ export async function createUserAction(_prevState: string | undefined, formData:
 export async function toggleUserActiveAction(userId: string) {
   const admin = await requireAdmin();
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+  const { t } = await getDictionary();
 
-  if (user.id === admin.id) throw new Error("You cannot deactivate your own account.");
+  if (user.id === admin.id) throw new Error(t.users.errorCannotDeactivateSelf);
 
   const updated = await prisma.user.update({
     where: { id: userId },
@@ -87,16 +90,17 @@ export async function updateUserAction(_prevState: string | undefined, formData:
     email: formData.get("email"),
     role: formData.get("role"),
   });
-  if (!parsed.success) return "Please fill in all fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.users.errorInvalidUpdate;
 
   if (parsed.data.userId === admin.id && parsed.data.role !== "ADMIN") {
-    return "You cannot remove your own admin role.";
+    return t.users.errorCannotRemoveOwnAdmin;
   }
 
   const duplicate = await prisma.user.findFirst({
     where: { email: parsed.data.email, NOT: { id: parsed.data.userId } },
   });
-  if (duplicate) return "A user with that email already exists.";
+  if (duplicate) return t.users.errorDuplicateEmail;
 
   const user = await prisma.user.update({
     where: { id: parsed.data.userId },
@@ -126,7 +130,8 @@ export async function resetPasswordAction(_prevState: string | undefined, formDa
     userId: formData.get("userId"),
     password: formData.get("password"),
   });
-  if (!parsed.success) return "Password must be at least 6 characters.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.users.errorPasswordMinLength;
 
   const passwordHash = await bcrypt.hash(parsed.data.password, 10);
   const user = await prisma.user.update({

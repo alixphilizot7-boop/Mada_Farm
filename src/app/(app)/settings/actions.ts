@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
+import { getDictionary } from "@/lib/i18n/locale";
 
 const schema = z.object({
   farmStartDate: z.string().min(1),
@@ -18,7 +19,8 @@ export async function updateFarmSettingsAction(_prevState: string | undefined, f
     farmStartDate: formData.get("farmStartDate"),
     mgaPerEur: formData.get("mgaPerEur"),
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   await prisma.farmSettings.upsert({
     where: { id: "singleton" },

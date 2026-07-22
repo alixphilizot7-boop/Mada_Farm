@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
 import { BusinessError } from "@/lib/errors";
+import { getDictionary } from "@/lib/i18n/locale";
+import { formatMessage } from "@/lib/i18n/format-message";
 
 const schema = z.object({
   date: z.string().min(1),
@@ -25,11 +27,12 @@ export async function createMortalityLogAction(_prevState: string | undefined, f
     cause: formData.get("cause") || undefined,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const flock = await prisma.flock.findUniqueOrThrow({ where: { id: parsed.data.flockId } });
   if (parsed.data.quantity > flock.currentCount) {
-    return `Only ${flock.currentCount} birds remain in this flock.`;
+    return formatMessage(t.common.notEnoughBirds, { count: flock.currentCount });
   }
 
   const log = await prisma.$transaction(async (tx) => {
@@ -85,11 +88,12 @@ export async function updateMortalityLogAction(_prevState: string | undefined, f
     cause: formData.get("cause") || undefined,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const existing = await prisma.mortalityLog.findUniqueOrThrow({ where: { id: parsed.data.id } });
   if (existing.healthRecordId) {
-    return "This loss was auto-logged from a Health record — edit it there instead.";
+    return t.mortality.errorEditElsewhere;
   }
 
   try {
@@ -103,7 +107,7 @@ export async function updateMortalityLogAction(_prevState: string | undefined, f
         });
         const targetFlock = await tx.flock.findUniqueOrThrow({ where: { id: parsed.data.flockId } });
         if (parsed.data.quantity > targetFlock.currentCount) {
-          throw new BusinessError(`Only ${targetFlock.currentCount} birds remain in this flock.`);
+          throw new BusinessError(formatMessage(t.common.notEnoughBirds, { count: targetFlock.currentCount }));
         }
         await tx.flock.update({
           where: { id: parsed.data.flockId },
@@ -114,7 +118,7 @@ export async function updateMortalityLogAction(_prevState: string | undefined, f
         if (delta !== 0) {
           const flock = await tx.flock.findUniqueOrThrow({ where: { id: parsed.data.flockId } });
           if (delta > flock.currentCount) {
-            throw new BusinessError(`Only ${flock.currentCount} birds remain in this flock.`);
+            throw new BusinessError(formatMessage(t.common.notEnoughBirds, { count: flock.currentCount }));
           }
           await tx.flock.update({
             where: { id: parsed.data.flockId },

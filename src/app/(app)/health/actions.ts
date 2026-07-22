@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
 import { BusinessError } from "@/lib/errors";
 import { syncMortalityForHealthRecord } from "@/lib/health-mortality-sync";
+import { getDictionary } from "@/lib/i18n/locale";
 
 const schema = z.object({
   date: z.string().min(1),
@@ -42,7 +43,8 @@ export async function createHealthRecordAction(_prevState: string | undefined, f
   const user = await requireUser();
 
   const parsed = parseHealthForm(formData);
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const date = new Date(parsed.data.date);
 
@@ -103,11 +105,12 @@ export async function createHealthRecordAction(_prevState: string | undefined, f
 
 export async function updateHealthRecordAction(_prevState: string | undefined, formData: FormData) {
   const user = await requireUser();
+  const { t } = await getDictionary();
   const id = formData.get("id");
-  if (typeof id !== "string" || !id) return "Missing record id.";
+  if (typeof id !== "string" || !id) return t.common.missingRecord;
 
   const parsed = parseHealthForm(formData);
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  if (!parsed.success) return t.common.invalidForm;
 
   const date = new Date(parsed.data.date);
 

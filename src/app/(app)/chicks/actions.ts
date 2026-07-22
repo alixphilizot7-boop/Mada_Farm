@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
 import { BusinessError } from "@/lib/errors";
+import { getDictionary } from "@/lib/i18n/locale";
+import { formatMessage } from "@/lib/i18n/format-message";
 
 const schema = z.object({
   date: z.string().min(1),
@@ -25,9 +27,10 @@ export async function createChickHatchAction(_prevState: string | undefined, for
     flockId: formData.get("flockId") || undefined,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
   if (parsed.data.chicksHatched > parsed.data.eggsSet) {
-    return "Chicks hatched can't exceed eggs set.";
+    return t.chicks.errorExceedsEggs;
   }
 
   const hatch = await prisma.$transaction(async (tx) => {
@@ -80,9 +83,10 @@ export async function updateChickHatchAction(_prevState: string | undefined, for
     flockId: formData.get("flockId") || undefined,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
   if (parsed.data.chicksHatched > parsed.data.eggsSet) {
-    return "Chicks hatched can't exceed eggs set.";
+    return t.chicks.errorExceedsEggs;
   }
 
   try {
@@ -95,7 +99,7 @@ export async function updateChickHatchAction(_prevState: string | undefined, for
           if (delta < 0) {
             const flock = await tx.flock.findUniqueOrThrow({ where: { id: parsed.data.flockId } });
             if (-delta > flock.currentCount) {
-              throw new BusinessError(`Can't reduce this hatch — only ${flock.currentCount} birds remain in the flock.`);
+              throw new BusinessError(formatMessage(t.chicks.errorReduceHatch, { count: flock.currentCount }));
             }
           }
           await tx.flock.update({ where: { id: parsed.data.flockId }, data: { currentCount: { increment: delta } } });
@@ -104,7 +108,7 @@ export async function updateChickHatchAction(_prevState: string | undefined, for
         if (existing.flockId && existing.chicksHatched > 0) {
           const oldFlock = await tx.flock.findUniqueOrThrow({ where: { id: existing.flockId } });
           if (existing.chicksHatched > oldFlock.currentCount) {
-            throw new BusinessError(`Can't move this hatch off its flock — only ${oldFlock.currentCount} birds remain there.`);
+            throw new BusinessError(formatMessage(t.chicks.errorMoveHatch, { count: oldFlock.currentCount }));
           }
           await tx.flock.update({ where: { id: existing.flockId }, data: { currentCount: { decrement: existing.chicksHatched } } });
         }

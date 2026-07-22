@@ -177,7 +177,8 @@ export default async function DashboardPage() {
           <ul className="space-y-1 text-sm text-amber-800 dark:text-amber-300">
             {vaccinationAlerts.slice(0, 8).map((a, i) => (
               <li key={i}>
-                <span className="font-medium">{a.flockName}</span> — {a.rule.name}{" "}
+                <span className="font-medium">{a.flockName}</span> —{" "}
+                {(t.dashboard.vaccinationNames as Record<string, string>)[a.rule.name] ?? a.rule.name}{" "}
                 {a.overdue ? (
                   <span className="font-semibold">{t.dashboard.overdueSince} {formatDate(a.dueDate)}</span>
                 ) : (

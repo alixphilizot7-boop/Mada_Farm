@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
 import { BusinessError } from "@/lib/errors";
+import { getDictionary } from "@/lib/i18n/locale";
+import { formatMessage } from "@/lib/i18n/format-message";
 
 const schema = z.object({
   date: z.string().min(1),
@@ -27,7 +29,8 @@ export async function createPurchaseAction(_prevState: string | undefined, formD
     supplier: formData.get("supplier") || undefined,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const totalCost = parsed.data.quantity * parsed.data.unitCost;
   const date = new Date(parsed.data.date);
@@ -102,7 +105,8 @@ export async function updatePurchaseAction(_prevState: string | undefined, formD
     supplier: formData.get("supplier") || undefined,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const totalCost = parsed.data.quantity * parsed.data.unitCost;
   const date = new Date(parsed.data.date);
@@ -120,7 +124,11 @@ export async function updatePurchaseAction(_prevState: string | undefined, formD
           const projected = existing.item.currentStock + delta;
           if (projected < 0) {
             throw new BusinessError(
-              `Can't reduce this purchase — only ${existing.item.currentStock} ${existing.item.unit} of ${existing.item.name} remain in stock (some was already used).`
+              formatMessage(t.inventory.purchasesPage.errorReduce, {
+                stock: existing.item.currentStock,
+                unit: existing.item.unit,
+                name: existing.item.name,
+              })
             );
           }
           await tx.inventoryItem.update({ where: { id: parsed.data.itemId }, data: { currentStock: { increment: delta } } });
@@ -128,7 +136,11 @@ export async function updatePurchaseAction(_prevState: string | undefined, formD
       } else {
         if (existing.item.currentStock - existing.quantity < 0) {
           throw new BusinessError(
-            `Can't move this purchase off "${existing.item.name}" — only ${existing.item.currentStock} ${existing.item.unit} remain (some was already used).`
+            formatMessage(t.inventory.purchasesPage.errorMove, {
+              name: existing.item.name,
+              stock: existing.item.currentStock,
+              unit: existing.item.unit,
+            })
           );
         }
         await tx.inventoryItem.update({ where: { id: existing.itemId }, data: { currentStock: { decrement: existing.quantity } } });

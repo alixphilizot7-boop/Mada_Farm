@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, AuthError } from "@/lib/require-user";
 import { getFarmSettings } from "@/lib/farm-settings";
+import { getDictionary } from "@/lib/i18n/locale";
 
 function csvCell(value: unknown) {
   const str = value === null || value === undefined ? "" : String(value);
@@ -16,24 +17,14 @@ export async function GET() {
     throw error;
   }
 
-  const [items, settings] = await Promise.all([
+  const [items, settings, { t }] = await Promise.all([
     prisma.capexItem.findMany({ orderBy: [{ category: "asc" }, { name: "asc" }] }),
     getFarmSettings(),
+    getDictionary(),
   ]);
   const mgaPerEur = settings.mgaPerEur;
 
-  const header = [
-    "Category",
-    "Item",
-    "Qty",
-    "Unit cost (EUR)",
-    "Total (EUR)",
-    "Total (MGA)",
-    "Status",
-    "Actual paid (EUR)",
-    "Supplier",
-    "Notes",
-  ];
+  const header = t.capex.csvHeaders;
 
   const rows = items.map((item) => [
     item.category,
@@ -42,7 +33,7 @@ export async function GET() {
     item.plannedUnitCost ?? "",
     item.plannedTotal ?? "",
     item.plannedTotal != null ? Math.round(item.plannedTotal * mgaPerEur) : "",
-    item.status,
+    t.capexStatus[item.status],
     item.status === "PURCHASED" ? item.actualTotal ?? "" : "",
     item.supplier ?? "",
     item.notes ?? "",

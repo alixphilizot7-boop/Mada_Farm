@@ -40,7 +40,7 @@ export function EditHealthRecordForm({ record, flocks }: { record: HealthRecord;
           <option value="">{t.health.form.notFromSchedule}</option>
           {VACCINATION_SCHEDULE.map((rule) => (
             <option key={rule.name} value={rule.name}>
-              {rule.name}
+              {(t.dashboard.vaccinationNames as Record<string, string>)[rule.name] ?? rule.name}
             </option>
           ))}
         </select>

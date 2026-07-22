@@ -21,7 +21,7 @@ export function ChangePasswordForm() {
       {message && (
         <p
           className={
-            message === "Password updated."
+            message === a.passwordUpdated
               ? "text-sm text-emerald-600"
               : "text-sm text-red-600"
           }

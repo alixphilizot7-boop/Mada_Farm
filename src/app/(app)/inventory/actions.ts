@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
+import { getDictionary } from "@/lib/i18n/locale";
 
 const schema = z.object({
   name: z.string().min(1),
@@ -22,10 +23,11 @@ export async function createItemAction(_prevState: string | undefined, formData:
     unit: formData.get("unit"),
     reorderLevel: formData.get("reorderLevel") || 0,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const existing = await prisma.inventoryItem.findUnique({ where: { name: parsed.data.name } });
-  if (existing) return "An inventory item with that name already exists.";
+  if (existing) return t.inventory.errorDuplicateName;
 
   const item = await prisma.inventoryItem.create({ data: parsed.data });
 
@@ -58,12 +60,13 @@ export async function updateItemAction(_prevState: string | undefined, formData:
     unit: formData.get("unit"),
     reorderLevel: formData.get("reorderLevel") || 0,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const duplicate = await prisma.inventoryItem.findFirst({
     where: { name: parsed.data.name, NOT: { id: parsed.data.id } },
   });
-  if (duplicate) return "An inventory item with that name already exists.";
+  if (duplicate) return t.inventory.errorDuplicateName;
 
   const item = await prisma.inventoryItem.update({
     where: { id: parsed.data.id },
@@ -101,7 +104,8 @@ export async function adjustStockAction(_prevState: string | undefined, formData
     newStock: formData.get("newStock"),
     reason: formData.get("reason"),
   });
-  if (!parsed.success) return "Enter a valid stock quantity and a reason for the adjustment.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.inventory.errorAdjustInvalid;
 
   const before = await prisma.inventoryItem.findUniqueOrThrow({ where: { id: parsed.data.id } });
   const item = await prisma.inventoryItem.update({

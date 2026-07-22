@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
+import { getDictionary } from "@/lib/i18n/locale";
 
 const createSchema = z.object({
   name: z.string().min(1),
@@ -25,7 +26,8 @@ export async function createFlockAction(_prevState: string | undefined, formData
     initialCount: formData.get("initialCount"),
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const flock = await prisma.flock.create({
     data: {
@@ -68,7 +70,8 @@ export async function updateFlockAction(_prevState: string | undefined, formData
     status: formData.get("status"),
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const flock = await prisma.flock.update({
     where: { id: parsed.data.id },

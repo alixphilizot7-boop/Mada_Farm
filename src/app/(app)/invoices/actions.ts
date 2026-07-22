@@ -7,6 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
 import { nextInvoiceNumber } from "@/lib/invoice-number";
+import { getDictionary } from "@/lib/i18n/locale";
+import { formatMessage } from "@/lib/i18n/format-message";
 import type { InvoiceStatus } from "@prisma/client";
 
 const itemSchema = z.object({
@@ -18,6 +20,7 @@ const itemSchema = z.object({
 
 export async function createInvoiceAction(_prevState: string | undefined, formData: FormData) {
   const user = await requireAdmin();
+  const { t } = await getDictionary();
 
   const customerId = formData.get("customerId");
   const issueDate = formData.get("issueDate");
@@ -25,15 +28,15 @@ export async function createInvoiceAction(_prevState: string | undefined, formDa
   const taxRate = Number(formData.get("taxRate") || 0);
   const notes = formData.get("notes");
 
-  if (typeof customerId !== "string" || !customerId) return "Select a customer.";
-  if (typeof issueDate !== "string" || !issueDate) return "Set an issue date.";
+  if (typeof customerId !== "string" || !customerId) return t.invoices.errorSelectCustomer;
+  if (typeof issueDate !== "string" || !issueDate) return t.invoices.errorSetIssueDate;
 
   const productTypes = formData.getAll("productType");
   const descriptions = formData.getAll("description");
   const quantities = formData.getAll("quantity");
   const unitPrices = formData.getAll("unitPrice");
 
-  if (productTypes.length === 0) return "Add at least one line item.";
+  if (productTypes.length === 0) return t.invoices.errorAddLineItem;
 
   const items: { productType: "EGGS" | "CHICKS" | "CHICKEN" | "OTHER"; description: string; quantity: number; unitPrice: number; total: number }[] = [];
   for (let i = 0; i < productTypes.length; i++) {
@@ -43,7 +46,7 @@ export async function createInvoiceAction(_prevState: string | undefined, formDa
       quantity: quantities[i],
       unitPrice: unitPrices[i],
     });
-    if (!parsed.success) return `Line item ${i + 1} is invalid.`;
+    if (!parsed.success) return formatMessage(t.invoices.errorLineItemInvalid, { index: i + 1 });
     items.push({ ...parsed.data, total: parsed.data.quantity * parsed.data.unitPrice });
   }
 
@@ -81,6 +84,7 @@ export async function createInvoiceAction(_prevState: string | undefined, formDa
 
 export async function updateInvoiceAction(_prevState: string | undefined, formData: FormData) {
   const user = await requireAdmin();
+  const { t } = await getDictionary();
 
   const id = formData.get("id");
   const customerId = formData.get("customerId");
@@ -89,16 +93,16 @@ export async function updateInvoiceAction(_prevState: string | undefined, formDa
   const taxRate = Number(formData.get("taxRate") || 0);
   const notes = formData.get("notes");
 
-  if (typeof id !== "string" || !id) return "Missing invoice id.";
-  if (typeof customerId !== "string" || !customerId) return "Select a customer.";
-  if (typeof issueDate !== "string" || !issueDate) return "Set an issue date.";
+  if (typeof id !== "string" || !id) return t.common.missingRecord;
+  if (typeof customerId !== "string" || !customerId) return t.invoices.errorSelectCustomer;
+  if (typeof issueDate !== "string" || !issueDate) return t.invoices.errorSetIssueDate;
 
   const productTypes = formData.getAll("productType");
   const descriptions = formData.getAll("description");
   const quantities = formData.getAll("quantity");
   const unitPrices = formData.getAll("unitPrice");
 
-  if (productTypes.length === 0) return "Add at least one line item.";
+  if (productTypes.length === 0) return t.invoices.errorAddLineItem;
 
   const items: { productType: "EGGS" | "CHICKS" | "CHICKEN" | "OTHER"; description: string; quantity: number; unitPrice: number; total: number }[] = [];
   for (let i = 0; i < productTypes.length; i++) {
@@ -108,7 +112,7 @@ export async function updateInvoiceAction(_prevState: string | undefined, formDa
       quantity: quantities[i],
       unitPrice: unitPrices[i],
     });
-    if (!parsed.success) return `Line item ${i + 1} is invalid.`;
+    if (!parsed.success) return formatMessage(t.invoices.errorLineItemInvalid, { index: i + 1 });
     items.push({ ...parsed.data, total: parsed.data.quantity * parsed.data.unitPrice });
   }
 

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
+import { getDictionary } from "@/lib/i18n/locale";
 
 const schema = z.object({
   date: z.string().min(1),
@@ -27,7 +28,8 @@ export async function createManualCashTransactionAction(
     amount: formData.get("amount"),
     description: formData.get("description") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const txn = await prisma.cashTransaction.create({
     data: {
@@ -75,11 +77,12 @@ export async function updateManualCashTransactionAction(
     amount: formData.get("amount"),
     description: formData.get("description") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const existing = await prisma.cashTransaction.findUniqueOrThrow({ where: { id: parsed.data.id } });
   if (existing.invoiceId || existing.purchaseId || existing.healthRecordId || existing.capexItemId) {
-    return "This entry was auto-generated from another record — edit it there instead.";
+    return t.cashflow.errorEditElsewhere;
   }
 
   const txn = await prisma.cashTransaction.update({

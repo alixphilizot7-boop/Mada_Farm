@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
 import { BusinessError } from "@/lib/errors";
+import { getDictionary } from "@/lib/i18n/locale";
+import { formatMessage } from "@/lib/i18n/format-message";
 
 const schema = z.object({
   date: z.string().min(1),
@@ -25,11 +27,12 @@ export async function createUsageAction(_prevState: string | undefined, formData
     quantity: formData.get("quantity"),
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const item = await prisma.inventoryItem.findUniqueOrThrow({ where: { id: parsed.data.itemId } });
   if (parsed.data.quantity > item.currentStock) {
-    return `Not enough stock: only ${item.currentStock} ${item.unit} of ${item.name} available.`;
+    return formatMessage(t.common.notEnoughStock, { stock: item.currentStock, unit: item.unit, name: item.name });
   }
 
   const usage = await prisma.$transaction(async (tx) => {
@@ -84,7 +87,8 @@ export async function updateUsageAction(_prevState: string | undefined, formData
     quantity: formData.get("quantity"),
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   try {
     const result = await prisma.$transaction(async (tx) => {
@@ -95,14 +99,14 @@ export async function updateUsageAction(_prevState: string | undefined, formData
         if (delta !== 0) {
           const projected = existing.item.currentStock - delta;
           if (projected < 0) {
-            throw new BusinessError(`Not enough stock: only ${existing.item.currentStock} ${existing.item.unit} of ${existing.item.name} available.`);
+            throw new BusinessError(formatMessage(t.common.notEnoughStock, { stock: existing.item.currentStock, unit: existing.item.unit, name: existing.item.name }));
           }
           await tx.inventoryItem.update({ where: { id: parsed.data.itemId }, data: { currentStock: { decrement: delta } } });
         }
       } else {
         const newItem = await tx.inventoryItem.findUniqueOrThrow({ where: { id: parsed.data.itemId } });
         if (parsed.data.quantity > newItem.currentStock) {
-          throw new BusinessError(`Not enough stock: only ${newItem.currentStock} ${newItem.unit} of ${newItem.name} available.`);
+          throw new BusinessError(formatMessage(t.common.notEnoughStock, { stock: newItem.currentStock, unit: newItem.unit, name: newItem.name }));
         }
         await tx.inventoryItem.update({ where: { id: existing.itemId }, data: { currentStock: { increment: existing.quantity } } });
         await tx.inventoryItem.update({ where: { id: parsed.data.itemId }, data: { currentStock: { decrement: parsed.data.quantity } } });

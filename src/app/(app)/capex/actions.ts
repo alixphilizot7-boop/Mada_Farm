@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
+import { getDictionary } from "@/lib/i18n/locale";
 
 const itemSchema = z.object({
   category: z.string().min(1),
@@ -36,7 +37,8 @@ export async function createCapexItemAction(_prevState: string | undefined, form
     link: formData.get("link") || undefined,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const item = await prisma.capexItem.create({
     data: {
@@ -75,7 +77,8 @@ export async function updateCapexItemAction(_prevState: string | undefined, form
     link: formData.get("link") || undefined,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const item = await prisma.capexItem.update({
     where: { id: parsed.data.id },
@@ -137,7 +140,8 @@ export async function recordCapexPurchaseAction(_prevState: string | undefined, 
     actualUnitCost: formData.get("actualUnitCost"),
     purchaseDate: formData.get("purchaseDate"),
   });
-  if (!parsed.success) return "Enter a valid quantity, unit cost and date.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.capex.purchaseForm.errorInvalid;
 
   const actualTotal = parsed.data.actualQuantity * parsed.data.actualUnitCost;
   const date = new Date(parsed.data.purchaseDate);

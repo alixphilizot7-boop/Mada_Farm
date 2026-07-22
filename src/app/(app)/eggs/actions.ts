@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
+import { getDictionary } from "@/lib/i18n/locale";
 
 const schema = z.object({
   date: z.string().min(1),
@@ -24,7 +25,8 @@ export async function createEggLogAction(_prevState: string | undefined, formDat
     brokenCount: formData.get("brokenCount") || 0,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const log = await prisma.eggLog.create({
     data: {
@@ -71,7 +73,8 @@ export async function updateEggLogAction(_prevState: string | undefined, formDat
     brokenCount: formData.get("brokenCount") || 0,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
 
   const existing = await prisma.eggLog.findUniqueOrThrow({ where: { id: parsed.data.id } });
 

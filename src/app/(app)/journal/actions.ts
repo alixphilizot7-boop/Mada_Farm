@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/require-user";
 import { logAudit } from "@/lib/audit";
 import { BusinessError } from "@/lib/errors";
+import { getDictionary } from "@/lib/i18n/locale";
+import { formatMessage } from "@/lib/i18n/format-message";
 
 const schema = z.object({
   date: z.string().min(1),
@@ -68,20 +70,21 @@ function revalidateAll(flockId: string) {
 export async function createDailyLogAction(_prevState: string | undefined, formData: FormData) {
   const user = await requireUser();
   const parsed = parseForm(formData);
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
   const d = parsed.data;
   const date = new Date(d.date);
 
   if (d.mortalityCount > 0) {
     const flock = await prisma.flock.findUniqueOrThrow({ where: { id: d.flockId } });
     if (d.mortalityCount > flock.currentCount) {
-      return `Only ${flock.currentCount} birds remain in this flock.`;
+      return formatMessage(t.common.notEnoughBirds, { count: flock.currentCount });
     }
   }
   if (d.feedItemId && d.feedQuantity > 0) {
     const item = await prisma.inventoryItem.findUniqueOrThrow({ where: { id: d.feedItemId } });
     if (d.feedQuantity > item.currentStock) {
-      return `Not enough stock: only ${item.currentStock} ${item.unit} of ${item.name} available.`;
+      return formatMessage(t.common.notEnoughStock, { stock: item.currentStock, unit: item.unit, name: item.name });
     }
   }
 
@@ -201,7 +204,8 @@ export async function updateDailyLogAction(_prevState: string | undefined, formD
     weather: formData.get("weather") || undefined,
     notes: formData.get("notes") || undefined,
   });
-  if (!parsed.success) return "Please fill in the required fields correctly.";
+  const { t } = await getDictionary();
+  if (!parsed.success) return t.common.invalidForm;
   const d = parsed.data;
   const date = new Date(d.date);
 
@@ -237,7 +241,7 @@ export async function updateDailyLogAction(_prevState: string | undefined, formD
           if (delta !== 0) {
             const flock = await tx.flock.findUniqueOrThrow({ where: { id: flockId } });
             if (delta > flock.currentCount) {
-              throw new BusinessError(`Only ${flock.currentCount} birds remain in this flock.`);
+              throw new BusinessError(formatMessage(t.common.notEnoughBirds, { count: flock.currentCount }));
             }
             await tx.flock.update({ where: { id: flockId }, data: { currentCount: { decrement: delta } } });
           }
@@ -248,7 +252,7 @@ export async function updateDailyLogAction(_prevState: string | undefined, formD
         } else {
           const flock = await tx.flock.findUniqueOrThrow({ where: { id: flockId } });
           if (d.mortalityCount > flock.currentCount) {
-            throw new BusinessError(`Only ${flock.currentCount} birds remain in this flock.`);
+            throw new BusinessError(formatMessage(t.common.notEnoughBirds, { count: flock.currentCount }));
           }
           await tx.flock.update({ where: { id: flockId }, data: { currentCount: { decrement: d.mortalityCount } } });
           const created = await tx.mortalityLog.create({
@@ -271,7 +275,7 @@ export async function updateDailyLogAction(_prevState: string | undefined, formD
             if (delta !== 0) {
               const item = await tx.inventoryItem.findUniqueOrThrow({ where: { id: d.feedItemId } });
               if (delta > item.currentStock) {
-                throw new BusinessError(`Not enough stock: only ${item.currentStock} ${item.unit} of ${item.name} available.`);
+                throw new BusinessError(formatMessage(t.common.notEnoughStock, { stock: item.currentStock, unit: item.unit, name: item.name }));
               }
               await tx.inventoryItem.update({ where: { id: d.feedItemId }, data: { currentStock: { decrement: delta } } });
             }
@@ -279,7 +283,7 @@ export async function updateDailyLogAction(_prevState: string | undefined, formD
             await tx.inventoryItem.update({ where: { id: existing.usage.itemId }, data: { currentStock: { increment: existing.usage.quantity } } });
             const newItem = await tx.inventoryItem.findUniqueOrThrow({ where: { id: d.feedItemId } });
             if (d.feedQuantity > newItem.currentStock) {
-              throw new BusinessError(`Not enough stock: only ${newItem.currentStock} ${newItem.unit} of ${newItem.name} available.`);
+              throw new BusinessError(formatMessage(t.common.notEnoughStock, { stock: newItem.currentStock, unit: newItem.unit, name: newItem.name }));
             }
             await tx.inventoryItem.update({ where: { id: d.feedItemId }, data: { currentStock: { decrement: d.feedQuantity } } });
           }
@@ -290,7 +294,7 @@ export async function updateDailyLogAction(_prevState: string | undefined, formD
         } else {
           const item = await tx.inventoryItem.findUniqueOrThrow({ where: { id: d.feedItemId } });
           if (d.feedQuantity > item.currentStock) {
-            throw new BusinessError(`Not enough stock: only ${item.currentStock} ${item.unit} of ${item.name} available.`);
+            throw new BusinessError(formatMessage(t.common.notEnoughStock, { stock: item.currentStock, unit: item.unit, name: item.name }));
           }
           await tx.inventoryItem.update({ where: { id: d.feedItemId }, data: { currentStock: { decrement: d.feedQuantity } } });
           const created = await tx.usage.create({

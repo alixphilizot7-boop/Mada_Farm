@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser, AuthError } from "@/lib/require-user";
 import { formatDate } from "@/lib/format";
+import { getDictionary } from "@/lib/i18n/locale";
 
 function csvCell(value: unknown) {
   const str = value === null || value === undefined ? "" : String(value);
@@ -16,6 +17,8 @@ export async function GET() {
     throw error;
   }
 
+  const { t } = await getDictionary();
+
   const logs = await prisma.dailyLog.findMany({
     orderBy: { date: "asc" },
     include: {
@@ -29,24 +32,7 @@ export async function GET() {
     },
   });
 
-  const header = [
-    "Date",
-    "Flock",
-    "Eggs collected",
-    "Birds lost",
-    "Mortality cause",
-    "Feed item",
-    "Feed quantity",
-    "Sick birds",
-    "Sick notes",
-    "Eggs sold",
-    "Chicks sold",
-    "Sale amount (EUR)",
-    "Sale amount (Ar)",
-    "Weather",
-    "Notes",
-    "Recorded by",
-  ];
+  const header = t.journal.csvHeaders;
 
   const rows = logs.map((log) => [
     formatDate(log.date),
